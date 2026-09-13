@@ -1,5 +1,7 @@
 # hr-onboard: privacy-preserving employee onboarding on Terminal 3
 
+[![CI](https://github.com/DikaCream/T3N-Challenge/actions/workflows/ci.yml/badge.svg)](https://github.com/DikaCream/T3N-Challenge/actions/workflows/ci.yml)
+
 An enterprise onboarding agent where **the AI never sees the employee's data**.
 
 The agent decides *which* onboarding steps to run, using only an internal employee
@@ -100,7 +102,7 @@ $EDITOR .env          # set T3N_API_KEY at minimum
 
 # 3. Build the contract and check it before it ever reaches the network
 npm run build:contract
-npm test              # typecheck + 15 Rust unit tests
+npm test              # typecheck + 58 unit tests + 15 contract tests
 
 # 4. Tenant setup, in this order
 npm run cli -- whoami     # confirm the session and the credit balance
@@ -198,12 +200,12 @@ Nothing in this section is projected.
 whoami      did:t3n:50a04efc…d642b3   testnet
 init        config/created  secrets/created  onboarding-log/created
 build       hr_onboard.wasm  217723 bytes  (wasm32-wasip2)
-test        tsc clean, 15/15 Rust unit tests
+test        tsc clean, 58/58 unit tests, 15/15 contract tests
 register    z:<tid>:employee-onboarding v0.1.2  contract_id 1005
 descriptor  published
 info        full self-description returned from inside the enclave
-preflight   provision-identity httpbin.org endpoint=yes credential=no
-            enroll-payroll     httpbin.org endpoint=yes credential=no
+preflight   provision-identity httpbin.org endpoint=yes credential=no egress=unknown
+            enroll-payroll     httpbin.org endpoint=yes credential=no egress=unknown
             READY (configured)
 ```
 
@@ -331,20 +333,28 @@ was made, are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 │   ├── lib/                          args, config, logger, table, url
 │   ├── services/                     shared by the CLI and the web routes
 │   └── t3n/                          session, tenant client, invocation
+│       (*.test.ts sits beside each module it covers: lib/url,
+│        lib/semver, lib/table, lib/args, lib/config, lib/log,
+│        agent/planner, contract/descriptor)
 ├── scripts/
-│   └── capture-console.mjs           screenshots the console via DevTools Protocol
+│   ├── capture-console.mjs           screenshots the console via DevTools Protocol
+│   └── build-submission-docx.mjs     renders docs/GOOGLE_DOC.md to the upload-ready .docx
 ├── screenshots/                      submission evidence: PNGs + console-text.txt
 ├── docs/
 │   ├── ARCHITECTURE.md               trust boundaries and design decisions
 │   ├── BUGS.md                       defects found in the T3N docs + SDK
-│   └── SUBMISSION.md                 the challenge write-up
+│   ├── GOOGLE_DOC.md                 the Doc content, screenshots inline
+│   └── SUBMISSION.md                 the challenge write-up (canonical)
 ```
 
 ## Testing
 
 ```bash
-npm test              # tsc --noEmit, then cargo test (15 tests)
+npm test              # tsc --noEmit, then 58 unit tests and 15 contract tests
 npm run typecheck     # types only
+npm run test:unit     # pure logic, no network: argument parsing, config loading,
+                      # host extraction, semver, tables, redaction, the planner
+                      # and the descriptor document
 npm run test:contract # contract logic only, no network
 npm run build         # production build of the web console
 
@@ -359,7 +369,24 @@ node scripts/capture-console.mjs http://localhost:3100/ screenshots
 Host calls are isolated behind `#[cfg(target_arch = "wasm32")]`, so the contract's
 decision logic (input validation, step selection, request-body construction,
 status roll-up, the scan-range invariant) is unit-testable with a plain
-`cargo test` and no TEE.
+`cargo test` and no TEE. The TypeScript unit tests use Node's built-in runner the
+same way: `node --test`, no test framework dependency, no network, no
+credentials.
+
+The test boundary is deliberate. Unit tests cover the pieces that make
+**decisions** or enforce a **boundary**: `hostOf` (the egress allow-list key),
+`redact` (credentials in log fields), `loadConfig` (which environment variables
+are required and how they are validated), `validateSteps` (a model's output is
+untrusted input), the risk and non-employee rules in the planner, and the
+descriptor the node validates at deploy time. The route handlers and React
+components are not unit-tested: they are thin wrappers that typecheck and are
+covered end to end by the recorded testnet walkthrough in
+[`docs/SUBMISSION.md`](docs/SUBMISSION.md).
+
+`.github/workflows/ci.yml` runs all of the above, plus both builds, on Linux and
+macOS at the documented Node minimum (22.18, where native type stripping becomes
+the default) and at the current LTS (24). The macOS runner is the point: the
+tests must pass on a maintainer's laptop without a Linux cross-compile target.
 
 ## Troubleshooting
 
@@ -391,6 +418,7 @@ The maintenance surface is three pieces, and each is small for a reason:
 | TEE contract | 1 389 lines of Rust (1 277 behaviour + 112 WIT boundary) plus a 94-line WIT world, 15 unit tests that run without a TEE, no network in tests. A new step is one `StepSpec` entry plus a `build_body` arm. |
 | Shared services + CLI | No build step, no bundler, one runtime dependency. |
 | Web console | No business logic of its own. Panels call routes, and routes call the same services the CLI calls. |
+| Tests and CI | `npm test` needs no credentials and no network, and runs on Linux and macOS. A new rule lands as a unit test next to the module it constrains. |
 
 See [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the handover notes.
 

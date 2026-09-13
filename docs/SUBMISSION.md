@@ -30,6 +30,7 @@ Three components, all in the repo:
 | **TEE contract** | `contracts/employee-onboarding/`: Rust → `wasm32-wasip2`, five exported functions over WIT, 15 unit tests that run without a TEE |
 | **Agent + shared services** | `src/`: TypeScript, zero build step (Node ≥ 22.18 native type stripping), 12 CLI commands |
 | **Web console** | `app/`: Next.js App Router. The SDK runs **only** in server route handlers; no client component ever holds `T3N_API_KEY` |
+| **Tests + CI** | `npm test`: 58 TypeScript unit tests (Node's built-in runner) and 15 contract tests, no network or credentials. CI runs both, plus both builds, on Linux and macOS at Node 22.18 and 24 |
 
 The CLI and the console call the same `src/services/` functions, so the safety
 rules are implemented once rather than re-derived per surface, which is what
@@ -96,7 +97,7 @@ npm install
 cp .env.example .env        # set T3N_API_KEY
 
 npm run build:contract      # Rust → WASM
-npm test                    # tsc + 15 contract unit tests
+npm test                    # typecheck + 58 unit tests + 15 contract tests
 
 npm run cli -- whoami
 npm run cli -- init
@@ -132,7 +133,7 @@ Run on 2026-09-13 against `testnet` with a real DID and key. Every step succeede
 |---|---|
 | `whoami` | `did:t3n:50a04efc…d642b3`, node `cn-api.sg.testnet` |
 | `build:contract` | `hr_onboard.wasm`, 217 723 bytes, target `wasm32-wasip2` |
-| `npm test` | typecheck clean, 15/15 Rust unit tests |
+| `npm test` | typecheck clean, 58/58 TypeScript unit tests, 15/15 Rust unit tests |
 | `init` | `config`, `secrets`, `onboarding-log` created |
 | `deploy` | registered `v0.1.2`, `contract_id 1005`, descriptor published, ACLs re-pointed |
 | `info` | full self-description returned **from inside the enclave** |
@@ -212,7 +213,7 @@ npm banner stays out of the frame, and give the terminal height for `info`.
 | 1 | SSO claim page (browser) | Scope detail: signed up, DID + API key obtained |
 | 2 | `npm run cli --silent -- whoami` | Quickstart: authenticated `did:t3n:…`, node, credits |
 | 3 | `rustup target add wasm32-wasip2` then `npm run build:contract` | Walkthrough: Rust → WASM component |
-| 4 | `npm test` | typecheck clean + 15/15 contract tests |
+| 4 | `npm test` | typecheck clean + 58/58 unit tests and 15/15 contract tests |
 | 5 | `npm run cli --silent -- init` | three tenant maps created |
 | 6 | `npm run cli --silent -- deploy` | registered `v0.1.2`, `contract_id`, **descriptor published**, ACLs re-pointed |
 | 7 | `npm run cli --silent -- info` | the deployed contract describing itself from inside the enclave |
@@ -299,6 +300,7 @@ Maintenance surface:
 | Web console | Low, because it holds no rules of its own: a panel calls a route, a route calls an existing service. A new operation is one route file plus one panel. |
 | Upstream integration | The real work, and it lives in configuration plus whichever HRIS/payroll schemas are targeted. `identity_endpoint` / `payroll_endpoint` and their header maps are the seams. |
 | SDK upgrades | The `register`/`publish` fallback in `deploy` and the contract-id ACL rewiring in `mapSpecs` are the two places a v5→v6 change would land. Both are isolated to one function each. |
+| Tests and CI | `npm test` needs no credentials and no network, and runs on Linux and macOS at Node 22.18 and 24. A new rule lands as a unit test beside the module it constrains. |
 
 One caveat about hosting: the console is not deployed publicly right now,
 and there is a reason beyond time: a public deployment holds `T3N_API_KEY` in its
@@ -307,9 +309,33 @@ Putting it online should wait for a **separate sandbox key**,
 with `ONBOARD_ALLOW_LIVE` left unset so the deployment can plan but not act. The
 code supports that mode today.
 
-If Terminal 3 would rather own it, the handover is: this repo plus a `.env`, and
-the two seams above. There is no state outside the tenant's own maps and the
-network ledger, so nothing needs migrating.
+### If it is handed over instead
+
+The handover is a repository, a tenant, and six steps. There is no state outside
+the tenant's own maps and the network ledger, so nothing needs migrating.
+
+1. **Access.** The tenant is owned by
+   `did:t3n:50a04efc91641528919da135e31d8995fcd642b3` and currently holds contract
+   `hr-onboard` v0.1.2 (`contract_id 1005`). Either transfer that key to the
+   maintainer, or claim a fresh tenant and re-register.
+2. **Re-register, only if a fresh tenant.** `npm run build:contract && npm run deploy`
+   builds the wasm and publishes the descriptor. `deploy` is safe to re-run: at the
+   same version it reconciles, at a higher one it registers, and on a downgrade it
+   says so in one line rather than surfacing a transport error.
+3. **Egress.** A fresh tenant starts deny-all, so a live run is refused until
+   `hr-onboard grant --agent <did> --hosts <hosts>` names the endpoints. The grant
+   is bound to a DID and must be re-issued if the DID changes (Section 6, finding 4).
+4. **Configuration.** `hr-onboard init` writes the step endpoints into the tenant's
+   `config` map; `hr-onboard seed` writes upstream credentials into the `secrets`
+   map, which only the contract can read. Retargeting a step to a real HRIS or
+   payroll provider is a config write, not a redeploy.
+5. **Credentials to rotate.** `T3N_API_KEY` is an Ethereum private key that signs
+   the login challenge, so it deserves the care of a wallet key. Rotate it together
+   with `HRIS_API_KEY`, `PAYROLL_API_KEY` and `LLM_API_KEY`, all of which live only
+   in `.env`, which is gitignored.
+6. **Running cost.** The tenant's credit balance pays for dispatch, and the
+   console's session panel shows what is left. Top up at the claim page. Nothing
+   else in the stack bills.
 
 I am happy to keep operating it and equally happy to hand it over. The code is
 written to be maintainable by someone who has never met me, which is why the

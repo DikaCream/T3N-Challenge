@@ -48,8 +48,12 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
         continue;
       }
       const next = argv[i + 1];
-      // A following bare token is the value, unless it is itself a flag or we
-      // are at the end, so `--live employee-1` must not swallow the positional.
+      // A following bare token is taken as this flag's value, unless it is
+      // itself a flag or we are at the end. The parser cannot know a flag's
+      // arity, so `--live emp-2041` binds "emp-2041" to `--live` rather than
+      // leaving it positional. Commands therefore read employee references from
+      // named flags (`--employee`), and `rejectPositionals` stops a stray token
+      // from being ignored.
       if (next !== undefined && !next.startsWith("-")) {
         flags[body] = next;
         i += 1;

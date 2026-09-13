@@ -15,8 +15,10 @@
     "cli": "node --env-file-if-exists=.env src/cli.ts",
     "typecheck": "tsc --noEmit",
     "build:contract": "cargo build --manifest-path contracts/employee-onboarding/Cargo.toml --release --target wasm32-wasip2",
+    "build:docx": "node scripts/build-submission-docx.mjs",
+    "test:unit": "node --test \"src/**/*.test.ts\"",
     "test:contract": "cargo test --manifest-path contracts/employee-onboarding/Cargo.toml --lib",
-    "test": "npm run typecheck && npm run test:contract"
+    "test": "npm run typecheck && npm run test:unit && npm run test:contract"
   },
   "dependencies": {
     "@terminal3/t3n-sdk": "5.2.0",
