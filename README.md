@@ -180,11 +180,11 @@ deliberately operator-only:
 | Records | `GET /api/records` | Stored onboarding records |
 | Audit | `GET /api/audit` | The ledger's own record of dispatches |
 
-**Contract registration stays CLI-only (`npm run cli -- deploy`).** It needs the
+Contract registration stays CLI-only (`npm run cli -- deploy`). It needs the
 compiled `.wasm` artifact and rewrites map ACLs. It is a build-and-provision step,
 not something a browser button should be able to trigger.
 
-**`live` is off by default in the web tier** and must be enabled explicitly with
+`live` is off by default in the web tier, and must be enabled explicitly with
 `ONBOARD_ALLOW_LIVE=true`. A publicly reachable deployment should not be able to
 move money-shaped data because someone found the URL. Leave it unset on anything
 that is not a private operator console.
@@ -274,12 +274,12 @@ was made, are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Security model
 
-- **No blanket trust.** An agent gets named functions on one contract plus an
-  explicit egress allow-list. No grant means the contract still runs and the
-  outbound call is denied.
-- **Egress is deny-all until granted.** A fresh tenant can reach nothing. Until
-  a delegation grant names the hosts, every outbound call is refused by the host.
-- **Honest preflight.** `preflight` reports everything it can actually verify
+- An agent gets named functions on one contract plus an explicit egress
+  allow-list. No grant means the contract still runs and the outbound call is
+  denied.
+- Egress is deny-all until granted. A fresh tenant can reach nothing. Until a
+  delegation grant names the hosts, every outbound call is refused by the host.
+- `preflight` reports everything it can actually verify
   (endpoint configured, credential present, profile fields the steps need) and
   deliberately does **not** claim to know egress authorisation, because that is
   decided at dispatch. The one interface that would expose it, `authorisation`,
@@ -287,19 +287,19 @@ was made, are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
   un-instantiable and every call fails with a content-free `Internal error`. So
   `egress_authorised` is `null` and the report says why, and a refusal surfaces as
   a `denied` step naming the host. See [`docs/BUGS.md`](docs/BUGS.md) #1.
-- **Dry by default.** The contract's `dry_run` defaults to `true`; a caller who
-  forgets the flag gets a plan, not a payroll enrolment. The CLI makes the
-  `--live` decision at exactly one line.
-- **Secrets are enclave-only.** `secrets` readers are `{ only: [contractId] }`.
-  The process that writes a credential cannot read it back.
-- **Logs are contract-only.** `onboarding-log` writers are `{ only: [contractId] }`,
-  so a record cannot be back-dated by whoever holds the tenant key.
-- **Nothing is echoed.** Upstream bodies are discarded; only the status code is
-  reported, so an upstream cannot launder PII back through an error path.
-- **The key never moves.** `T3N_API_KEY` is an Ethereum private key. It signs the
-  login challenge locally and is never sent anywhere.
-- **But `.next/` does hold it, so never ship it.** Measured: the key appears in
-  **0** files under `.next/static/` and `.next/server/`, so no client bundle and no
+- The contract's `dry_run` defaults to `true`, so a caller who forgets the flag
+  gets a plan rather than a payroll enrolment. The CLI makes the `--live`
+  decision at one line.
+- `secrets` readers are `{ only: [contractId] }`, so the process that writes a
+  credential cannot read it back.
+- `onboarding-log` writers are `{ only: [contractId] }`, so a record cannot be
+  back-dated by whoever holds the tenant key.
+- Upstream bodies are discarded and only the status code is reported, so an
+  upstream cannot launder PII back through an error path.
+- `T3N_API_KEY` is an Ethereum private key. It signs the login challenge locally
+  and is never sent anywhere.
+- `.next/` does hold the key, so never ship it. It appears in **0** files under
+  `.next/static/` and `.next/server/`, so no client bundle and no
   server output carries it, which is the property that actually matters. It *is*
   written into Turbopack's build cache (`.next/cache/turbopack/*.sst`, 11 files),
   because the value is read while Next collects page data. `.next/` is gitignored,
@@ -384,7 +384,7 @@ The contract is deliberately small and config-driven: retargeting a step is a
 `config` map write, not a redeploy. Everything runs on the public testnet
 against endpoints you choose.
 
-The maintenance surface is three pieces, and each is small on purpose:
+The maintenance surface is three pieces, and each is small for a reason:
 
 | Piece | Why it stays maintainable |
 |---|---|

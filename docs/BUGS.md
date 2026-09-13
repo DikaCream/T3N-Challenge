@@ -17,9 +17,9 @@ target `wasm32-wasip2`, 2026-09-13.
 
 ### 1. Importing `authorisation` makes a contract un-instantiable, and the error says nothing
 
-**What happens.** A contract that imports `host:interfaces/authorisation@2.1.0`
-registers successfully, is listed as `status: "active"`, and then fails *every*
-dispatch with:
+A contract that imports `host:interfaces/authorisation@2.1.0` registers
+successfully, is listed as `status: "active"`, and then fails *every* dispatch
+with:
 
 ```
 RPC Error: Internal error [7e0a2e41-836c-4143-ba22-a2bc2a545a63]
@@ -36,22 +36,22 @@ No field name, no component, no hint. It is the same error for `contract-info`,
 `preflight` and every other function, and `contracts.logs()` is empty (see #7), so
 there is nothing to cross-check.
 
-**Evidence that the import is the cause.** Two builds of the same crate, differing
-by one line in `world.wit`:
+The import is the cause. Two builds of the same crate differ by one line in
+`world.wit`:
 
 | Build | Imports | Dispatch |
 |---|---|---|
 | A | `logging`, `kv-store`, `http-with-placeholders`, `tenant-context`, **`authorisation`** | every call → `Internal error` |
 | B | the same four, **without `authorisation`** | returns its full `contract-info` immediately |
 
-**Why it is a trap rather than an oversight.** `authorisation` is *declared* as
+It is a trap rather than an oversight, because `authorisation` is *declared* as
 available: `host-interfaces-2.1.0/package.wit` ends with
 `world interfaces { … export authorisation; … }`. And it is the one interface that
 lets a contract answer "would egress to this host be allowed?" *before* acting,
-which is precisely the pattern the docs recommend. So the interface that most
+which is the pattern the docs recommend. So the interface that most
 encourages the right design is the one that silently bricks the contract.
 
-**Workaround used.** Not imported. Egress refusal is instead read from
+The workaround is to leave it unimported. Egress refusal is instead read from
 `http-with-placeholders`'s typed `egress-denied` variant, which arrives at the
 moment of dispatch. The cost is real: `preflight` can no longer report egress
 authorisation, so `egress_authorised` is `null` and the report says why, rather
@@ -59,7 +59,7 @@ than showing a green tick it cannot justify.
 
 ### 2. `register` reports success, but the contract is not dispatchable until `setDescriptor`
 
-**What happens.** `contracts.register({tail, version, wasm})` returns
+`contracts.register({tail, version, wasm})` returns
 `{name, contract_id}`. `contracts.listDetailed()` then reports
 `status: "active"`, and `descriptor: null`. Every `execute` still fails with the
 same unactionable `Internal error` from #1, for which the descriptor was in fact
@@ -74,8 +74,8 @@ Nothing in the Quickstart or the Walkthrough says a descriptor is required, and 
 step fails visibly when it is missing. A deployment that skipped it looks
 completely successful.
 
-**Workaround used.** `deploy` now publishes a descriptor on every run
-(`src/contract/descriptor.ts`), and `docs/ARCHITECTURE.md` records why.
+`deploy` now publishes a descriptor on every run (`src/contract/descriptor.ts`),
+and `docs/ARCHITECTURE.md` records why.
 
 ### 3. The descriptor schema is undocumented; the validator is the only specification
 
@@ -154,8 +154,8 @@ The official `Terminal-3/z-tenant-flight` uses exactly that, in `src/booking.rs`
 "email": "{{profile.verified_contacts.email.value}}",
 ```
 
-**Measured, and the spec comment is wrong.** Both directions were tested against
-testnet with the same contract, differing only in the marker:
+The spec comment is wrong, and that was measured. Both directions were tested
+against testnet with the same contract, differing only in the marker:
 
 | Marker | Result |
 |---|---|
@@ -221,7 +221,7 @@ have shortened the diagnosis from hours to minutes.
 
 ---
 
-## Not a T3N defect, but worth knowing
+## Not a T3N defect, but relevant on Next.js
 
 `next build` writes `T3N_API_KEY` into **Turbopack's build cache**, 11 files under
 `.next/cache/turbopack/*.sst`, because the value is read while Next collects page
@@ -246,13 +246,13 @@ assumption.
 
 ## If only three are read
 
-**#1** and **#2** are the ones worth fixing first: both make a correct deployment
-look broken, both surface as the same content-free `Internal error`, and between
-them they accounted for nearly all the time spent on this build. **#3** is the
-cheapest to fix: publishing the eight required field names would have made the
-descriptor recoverable in one attempt instead of eight.
+#1 and #2 are the ones to fix first: both make a correct deployment look broken,
+both surface as the same content-free `Internal error`, and between them they
+accounted for nearly all the time spent on this build. #3 is the cheapest to fix:
+publishing the eight required field names would have made the descriptor
+recoverable in one attempt instead of eight.
 
-**#6** is the one that cost the most wall-clock time, because every signal pointed
-the wrong way: the spec called the correct marker malformed, the write API accepted
+#6 is the one that cost the most wall-clock time, because every signal pointed the
+wrong way: the spec called the correct marker malformed, the write API accepted
 the incorrect one, and the resulting error named a missing *field* rather than a wrong
 *name*. Correcting the doc comment is a one-line fix with an outsized effect.

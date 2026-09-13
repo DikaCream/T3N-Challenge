@@ -28,25 +28,21 @@ Each column is a separate trust boundary, and each has a different failure mode.
 
 ## Trust boundary 1: agent → contract
 
-**What crosses:** `employee_ref`, `role`, `department`, `start_date`, `currency`,
-`dry_run`, `steps`.
+The values that cross are `employee_ref`, `role`, `department`, `start_date`,
+`currency`, `dry_run` and `steps`. Nothing about the person crosses: `employee_ref`
+is an HR-internal identifier like `emp-2041`, and the contract validates it is at
+most 64 characters of ASCII letters, digits, `-`, `_`, `.` or `/`. It rejects `:`
+and `;` outright, because those are structural in the map key (`onboard:<ref>`) and
+in the scan range end.
 
-**What cannot cross:** anything about the person. `employee_ref` is an HR-internal
-identifier like `emp-2041`; the contract validates it is at most 64 characters of
-ASCII letters, digits, `-`, `_`, `.` or `/`, and explicitly rejects `:` and `;`
-because those are structural in the map key (`onboard:<ref>`) and the scan range
-end.
+Enforcement here is structural rather than procedural: the contract's input types
+(`StartInput` in `src/onboarding.rs`) have no field for a name, an email or an
+account number, so a caller wanting to send PII has nowhere to put it.
 
-**Enforcement:** the contract's input types (`StartInput` in
-`src/onboarding.rs`) have no field for a name, an email or an account number. This
-is the strongest enforcement available at this boundary, not a policy but a type. A
-caller wanting to send PII has nowhere to put it.
-
-**Why the planning happens on the agent side:** deciding *which steps to run* is a
-judgement call, and a judgement call is exactly what you want a model for. It only
-needs non-sensitive context, so the model gets exactly that and nothing more. This
-is why `src/agent/planner.ts` can safely be an LLM and still keep the privacy
-property.
+Planning happens on the agent side because deciding *which steps to run* is a
+judgement call, and that is what a model is for. It needs only non-sensitive
+context, so the model gets that and nothing more, which is why
+`src/agent/planner.ts` can safely be an LLM and still keep the privacy property.
 
 ## Trust boundary 2: contract → host
 
@@ -70,8 +66,8 @@ is built, inside the enclave, after the bytes have left the guest. The contract
 sees the response status; it never sees the request as sent, and it never sees the
 response body, which matters, because an upstream can echo what it received.
 
-**Consequence worth stating plainly:** the markers in the request body are not a
-redaction applied for display. They are the actual payload. A dry run printing
+The markers in the request body are not a redaction applied for display. They are
+the actual payload. A dry run printing
 `{{profile.first_name}}` is not hiding anything; that string is genuinely all the
 contract ever has.
 
@@ -131,8 +127,7 @@ and fails every call with that same unactionable error. See [`BUGS.md`](BUGS.md)
 
 ## The map access model
 
-Three maps, three different access stories, chosen deliberately rather than
-defaulted:
+Three maps, three different access stories, each chosen rather than defaulted on:
 
 | Map | Readers | Writers | Reasoning |
 |---|---|---|---|
@@ -140,12 +135,12 @@ defaulted:
 | `secrets` | `{ only: [contractId] }` | `{ only: [] }` | Upstream credentials. The enclave reads them; nothing else can, **including the process that wrote them**. |
 | `onboarding-log` | `all` | `{ only: [contractId] }` | The business record. Written only by the contract so a record cannot be back-dated by whoever holds the tenant key; readable widely because it contains no PII by construction. |
 
-Two consequences of this table are worth calling out:
+Two consequences follow from this table:
 
-- **The write path for `secrets` is the control plane, and its readers gate the enclave.**
-  That asymmetry is the point: `entrySet` writes a value its own caller cannot
-  read back.
-- **`onboarding-log` is not a compliance-grade audit.** Readable-and-writable
+- The write path for `secrets` is the control plane, and its readers gate the
+  enclave. The asymmetry is the design: `entrySet` writes a value its own caller
+  cannot read back.
+- `onboarding-log` is not a compliance-grade audit. Readable-and-writable
   checks in this table bound what a contract may do; they do not make the record
   tamper-evident against the tenant owner. The tamper-evident trail is the
   network's own ledger, surfaced by `hr-onboard audit`, where `actor`,
@@ -202,15 +197,15 @@ interface, with the deterministic one as the fallback. That is not hedging:
 | Config key absent | Error naming the key and the `init` command | The most likely first-run failure deserves a fix, not a stack trace |
 | Partial success | Record `status: partial` | `summarise` distinguishes all-failed from some-failed, because "the payroll step failed but the seat exists" needs different handling from a total failure |
 
-## What is intentionally *not* built
+## What is not built
 
-- **No PII field beyond what the platform documents as resolvable.** The contract
+- No PII field beyond what the platform documents as resolvable. The contract
   uses `first_name`, `last_name`, `ssn`, `address` and `country_of_residence` from
   the SDK's `UserInputProfile`, plus the email at its real path,
-  **`verified_contacts.email.value`**, nested, and deliberately so. A bank-account
-  placeholder would have been more impressive on a slide and would have been
-  guesswork: no such field is documented anywhere, and a wrong guess fails at runtime
-  inside the enclave.
+  `verified_contacts.email.value`, nested because that is where the host keeps it.
+  A bank-account placeholder would have been more impressive on a slide and would
+  have been guesswork: no such field is documented anywhere, and a wrong guess fails
+  at runtime inside the enclave.
 
   An earlier revision of this contract used a flat `{{profile.email_address}}` and
   avoided the nested path, because the WIT spec's own wording calls nested markers
@@ -218,9 +213,9 @@ interface, with the deterministic one as the fallback. That is not hedging:
   *"the calling profile is missing field 'email_address'"*, an error that reads like
   absent data rather than a wrong field name. Both directions were tested; see
   [`BUGS.md`](BUGS.md) #6.
-- **No web UI.** The task is an enterprise integration, and a CLI is the surface
+- No web UI. The task is an enterprise integration, and a CLI is the surface
   that can actually run unattended after the challenge. A UI would have been
   screenshots without a deployment story.
-- **No retry or queueing.** A failed step leaves a `partial` record and stops.
-  Automatic retries against payroll are exactly the kind of thing that should
+- No retry or queueing. A failed step leaves a `partial` record and stops.
+  Automatic retries against payroll are the kind of thing that should
   require a human, and pretending otherwise would make the record harder to trust.

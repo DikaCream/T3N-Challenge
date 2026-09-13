@@ -23,7 +23,7 @@ need, and ends with the form answers. If a fact changes, change it in
 
 ## Employee onboarding where the agent never sees the employee
 
-**T3N Agent Build Challenge submission** · Terminal 3 Network
+T3N Agent Build Challenge submission for Terminal 3 Network
 
 | | |
 |---|---|
@@ -112,7 +112,7 @@ are substituted by the host inside the enclave, and I have never seen the values
 - `getActivityLog`: the ledger's host-stamped record of dispatches
 - `serverExternalPackages` (Next.js): keeps the SDK's runtime `.wasm` load out of the bundler
 
-**Not used, deliberately:** `host:interfaces/authorisation`. It is the natural way to
+Not used: `host:interfaces/authorisation`. It is the natural way to
 ask "may this host be reached?" before acting, but importing it makes the contract
 un-instantiable. See Section 6.
 
@@ -187,8 +187,8 @@ network's own record.
 Fourteen items in `docs/BUGS.md`. The three critical ones were found by running the
 thing, and each is reproducible.
 
-**1. Importing `host:interfaces/authorisation@2.1.0` makes a contract
-un-instantiable, and the error says nothing.** Every dispatch returns a bare
+1. Importing `host:interfaces/authorisation@2.1.0` makes a contract
+un-instantiable, and the error says nothing. Every dispatch returns a bare
 `RPC Error: Internal error` with no field, no component, no hint. The raw JSON-RPC
 response is `{"code": -32603, "message": "Internal error"}` plus a correlation id,
 and `contracts.logs()` is empty, so there is nothing to cross-check. Established by
@@ -198,20 +198,20 @@ to returning its full `contract-info`. The interface *is* declared in the host's
 egress?" before acting, so the design the docs encourage is the one that silently
 bricks the build.
 
-**2. `register` reports success but the contract is not dispatchable until
-`setDescriptor` is called.** `listDetailed` reports `status: "active"` with
+2. `register` reports success but the contract is not dispatchable until
+`setDescriptor` is called. `listDetailed` reports `status: "active"` with
 `descriptor: null`, and every call fails with that same content-free error. Nothing
 in the Quickstart or Walkthrough mentions the descriptor; the only pointer is a doc
 comment about the "MCP dispatch funnel". A deployment that skips it looks completely
 successful.
 
-**3. The descriptor schema is undocumented.** Eight required fields per function,
+3. The descriptor schema is undocumented. Eight required fields per function,
 recovered one validator error at a time, and two are counter-intuitive: `returns`
 (the obvious guess, `returns_schema`, is rejected) and `examples`. The SDK type is
 explicitly open-ended, so it offers no help either.
 
-**4. The WIT spec calls nested placeholders "malformed"; they are not, and the email
-only resolves at a nested path.** The spec defines `placeholder-denied` as covering a
+4. The WIT spec calls nested placeholders "malformed"; they are not, and the email
+only resolves at a nested path. The spec defines `placeholder-denied` as covering a
 *"malformed marker (nested / non-snake-case field)"*. But the email is not on the
 top-level profile the way `first_name` is; the host keeps it under the
 verified-contacts structure, so the resolvable marker is
@@ -246,7 +246,7 @@ ACLs to deny-all and silently revoke the deployed contract's access to its own m
 
 ## 7. Post-challenge maintenance
 
-**Intention: continue running it.** Happy to hand it over.
+The intention is to keep running it, and I am happy to hand it over.
 
 This is a standalone integration on the public testnet. Nothing depends on a hosted
 service, a private endpoint, or a machine that exists only during the challenge. It
@@ -254,7 +254,7 @@ runs from a checkout with one key in `.env`, and the contract is config-driven:
 retargeting a step to a real HRIS or payroll provider is a `config` map write, not a
 redeploy.
 
-Running it in two ways is a deliberate hedge: the CLI suits a scheduled job or a
+Running it in two ways is a hedge: the CLI suits a scheduled job or a
 single operator, the web console suits an HR team that will not open a terminal.
 Neither carries its own copy of the logic.
 
@@ -270,10 +270,10 @@ Neither carries its own copy of the logic.
 `.env`. The two seams above are where upstream work lands. There is no state outside
 the tenant's own maps and the network ledger, so nothing needs migrating.
 
-**Hosting caveat, stated plainly.** The console is not deployed publicly, and there
+One caveat about hosting: the console is not deployed publicly, and there
 is a reason beyond time: a public deployment holds `T3N_API_KEY` in its environment,
 and any caller who finds the URL can spend the tenant's credits. Putting it online
-should be a deliberate step taken with a **separate sandbox key**, with
+should wait for a **separate sandbox key**, with
 `ONBOARD_ALLOW_LIVE` left unset so the deployment can plan but not act. The code
 supports that mode today.
 

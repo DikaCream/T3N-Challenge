@@ -80,7 +80,7 @@ there, the design would have failed visibly.
 - `getActivityLog`: the ledger's host-stamped record of dispatches
 - `serverExternalPackages` (Next.js): keeps the SDK's runtime `.wasm` load out of the bundler, which the T3N docs name as the failure mode under Turbopack/Vite/Webpack
 
-**Not used, deliberately:** `host:interfaces/authorisation`. It is the natural way to
+Not used: `host:interfaces/authorisation`. It is the natural way to
 ask "may this host be reached?" before acting, but importing it makes the contract
 un-instantiable: every dispatch fails with `RPC Error: Internal error` and nothing
 else. The same crate without that import dispatches correctly. See Section 6 and
@@ -161,7 +161,7 @@ like missing data instead of a wrong field name. See [`BUGS.md`](BUGS.md) #6.
 
 ## 5. Screenshots
 
-**Before capturing anything, close `.env`.** `T3N_API_KEY` is an Ethereum private
+Before capturing anything, close `.env`. `T3N_API_KEY` is an Ethereum private
 key and one stray screenshot exposes the tenant. Nothing below was taken with it
 on screen.
 
@@ -224,7 +224,7 @@ npm banner stays out of the frame, and give the terminal height for `info`.
 | 13 | **`audit`** | the ledger showing `error` dispatches, then `success`. That is the bug and its fix, attested by the network |
 | 14 | Browser devtools: search the bundle for `T3N_API_KEY` | the credential never reaches the client (0 hits) |
 
-**9, 11 and 13 are the three that matter.** They show the privacy mechanism, a real
+Items 9, 11 and 13 are the three that matter. They show the privacy mechanism, a real
 outbound call, and the failure-then-fix in the network's own record. If only three
 screenshots make the Doc, make them those.
 
@@ -235,21 +235,21 @@ screenshots make the Doc, make them those.
 Fourteen items in [`docs/BUGS.md`](BUGS.md), split into critical, notable and minor.
 The three critical ones were found by running the thing, and each is reproducible:
 
-1. **Importing `host:interfaces/authorisation@2.1.0` makes a contract
-   un-instantiable, and the error says nothing.** Every dispatch returns a bare
+1. Importing `host:interfaces/authorisation@2.1.0` makes a contract
+   un-instantiable, and the error says nothing. Every dispatch returns a bare
    `RPC Error: Internal error` with no field and no component. Established by bisection:
 the same crate, differing by that one import, goes from failing every call to
    returning its full `contract-info`. The interface *is* declared in the host's
    `world interfaces`, and it is the one interface that would let a contract ask
    "may I egress?" before acting. So the design the docs encourage is the one that
    silently bricks the build.
-2. **`register` reports success but the contract is not dispatchable until
-   `setDescriptor` is called.** `listDetailed` says `status: "active"` with
+2. `register` reports success but the contract is not dispatchable until
+   `setDescriptor` is called. `listDetailed` says `status: "active"` with
    `descriptor: null`, and every call fails with that same content-free error.
    Nothing in the Quickstart or Walkthrough mentions the descriptor; the only
    pointer is a doc comment about the "MCP dispatch funnel". Deploying without it
    looks completely successful.
-3. **The descriptor schema is undocumented.** Eight required fields per function,
+3. The descriptor schema is undocumented. Eight required fields per function,
    recovered one validator error at a time, and two are counter-intuitive:
    `returns` (not `returns_schema`) and `examples`. The SDK type is explicitly
    open-ended, so it gives no help either.
@@ -286,11 +286,11 @@ challenge. It runs from a checkout with one key in `.env`, and the contract is
 config-driven: retargeting a step to a real HRIS or payroll provider is a `config`
 map write, not a redeploy.
 
-Running it in two ways is a deliberate hedge on maintenance: the CLI suits a
+Running it in two ways is a hedge on maintenance: the CLI suits a
 scheduled job or a single operator, and the web console suits an HR team that will
 not open a terminal. Neither carries its own copy of the logic.
 
-Maintenance surface, honestly stated:
+Maintenance surface:
 
 | Component | Ongoing cost |
 |---|---|
@@ -300,10 +300,10 @@ Maintenance surface, honestly stated:
 | Upstream integration | The real work, and it lives in configuration plus whichever HRIS/payroll schemas are targeted. `identity_endpoint` / `payroll_endpoint` and their header maps are the seams. |
 | SDK upgrades | The `register`/`publish` fallback in `deploy` and the contract-id ACL rewiring in `mapSpecs` are the two places a v5→v6 change would land. Both are isolated to one function each. |
 
-**Hosting caveat, stated plainly.** The console is not deployed publicly right now,
+One caveat about hosting: the console is not deployed publicly right now,
 and there is a reason beyond time: a public deployment holds `T3N_API_KEY` in its
 environment, and any caller who finds the URL can spend the tenant's credits.
-Putting it online should be a deliberate step taken with a **separate sandbox key**,
+Putting it online should wait for a **separate sandbox key**,
 with `ONBOARD_ALLOW_LIVE` left unset so the deployment can plan but not act. The
 code supports that mode today.
 
@@ -311,7 +311,7 @@ If Terminal 3 would rather own it, the handover is: this repo plus a `.env`, and
 the two seams above. There is no state outside the tenant's own maps and the
 network ledger, so nothing needs migrating.
 
-**Happy to keep operating it, and equally happy to hand it over.** The code is
+I am happy to keep operating it and equally happy to hand it over. The code is
 written to be maintainable by someone who has never met me, which is why the
 decision does not change the design.
 
