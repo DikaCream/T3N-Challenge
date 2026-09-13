@@ -1,10 +1,10 @@
-//! hr-onboard — privacy-preserving employee onboarding inside the TEE.
+//! hr-onboard: privacy-preserving employee onboarding inside the TEE.
 //!
 //! Splits cleanly in two:
-//! - `onboarding` — everything the contract does, with the few host calls
+//! - `onboarding`: everything the contract does, with the few host calls
 //!   isolated behind `#[cfg(target_arch = "wasm32")]` so the pure logic is
 //!   unit-testable with a plain `cargo test` on the host.
-//! - the `Guest` impl below — the thin WIT boundary the node dispatches to.
+//! - the `Guest` impl below: the thin WIT boundary the node dispatches to.
 //!
 //! Why this contract exists: onboarding is the moment an enterprise moves a
 //! new hire's most sensitive data (legal name, personal email, national id,

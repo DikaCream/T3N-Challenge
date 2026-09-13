@@ -18,7 +18,7 @@ import type { Logger } from "../lib/log.ts";
  * An authenticated `did:t3n:...` session.
  *
  * `did` is the tenant identity the platform assigned this key the first time it
- * signed in. It is opaque and unrelated to the wallet address — never derived,
+ * signed in. It is opaque and unrelated to the wallet address, never derived,
  * always read back from the authenticated session.
  */
 export interface Session {

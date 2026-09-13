@@ -7,7 +7,7 @@
  * come from modules with no filesystem or SDK imports, so a client component can
  * reference them without pulling anything into the bundle. `import type` and
  * `export type` are erased by `verbatimModuleSyntax`, so this costs the browser
- * zero bytes — while a hand-copied duplicate would be free to drift from the
+ * zero bytes, while a hand-copied duplicate would be free to drift from the
  * contract's real output on any future change.
  *
  * `ApiEnvelope` and `Async` are genuinely browser-only concepts, so they are the

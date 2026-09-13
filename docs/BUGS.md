@@ -6,7 +6,7 @@ for "any bug faced" and this is the least weighted of its criteria.
 Everything in the **Critical** section is reproduced from a real run against
 testnet, not read out of the docs. The bug entries in the network ledger tell the
 same story: 9 dispatches recorded as `error`, then `success` for all 23 after the
-fix. `hr-onboard audit` prints exactly that — 32 entries, 9 `error`, 23 `success`.
+fix. `hr-onboard audit` prints exactly that: 32 entries, 9 `error`, 23 `success`.
 
 Environment: `@terminal3/t3n-sdk@5.2.0`, Node 24.20.0, rustc/cargo 1.98.0,
 target `wasm32-wasip2`, 2026-09-13.
@@ -45,7 +45,7 @@ by one line in `world.wit`:
 | B | the same four, **without `authorisation`** | returns its full `contract-info` immediately |
 
 **Why it is a trap rather than an oversight.** `authorisation` is *declared* as
-available — `host-interfaces-2.1.0/package.wit` ends with
+available: `host-interfaces-2.1.0/package.wit` ends with
 `world interfaces { … export authorisation; … }`. And it is the one interface that
 lets a contract answer "would egress to this host be allowed?" *before* acting,
 which is precisely the pattern the docs recommend. So the interface that most
@@ -61,7 +61,7 @@ than showing a green tick it cannot justify.
 
 **What happens.** `contracts.register({tail, version, wasm})` returns
 `{name, contract_id}`. `contracts.listDetailed()` then reports
-`status: "active"` — and `descriptor: null`. Every `execute` still fails with the
+`status: "active"`, and `descriptor: null`. Every `execute` still fails with the
 same unactionable `Internal error` from #1, for which the descriptor was in fact
 the cause.
 
@@ -79,7 +79,7 @@ completely successful.
 
 ### 3. The descriptor schema is undocumented; the validator is the only specification
 
-`setDescriptor` rejects a malformed document — with genuinely good, specific
+`setDescriptor` rejects a malformed document, with genuinely good, specific
 errors. That is how the schema was recovered, one error at a time:
 
 ```
@@ -103,7 +103,7 @@ only way to learn the schema is to submit eight wrong documents.
 
 ### 4. A fresh tenant has deny-all egress, and the documented fix does not apply to it
 
-The first `--live` run is refused by the host — correctly, and with a clear reason:
+The first `--live` run is refused by the host, correctly and with a clear reason:
 
 ```
 provision-identity  denied  httpbin.org  -
@@ -136,7 +136,7 @@ But `email_address` is not a resolvable path (see #6), so the field is accepted 
 then silently unusable as a placeholder. Nothing in the write response distinguishes
 "stored and resolvable" from "stored, but not something a marker can reference".
 
-The failure surfaces later and elsewhere — as a step failure inside a contract run,
+The failure surfaces later and elsewhere, as a step failure inside a contract run,
 which is the most expensive place to discover a field-name mismatch. A note in the
 `UserInputProfile` doc listing which fields are resolvable via `{{profile.*}}`, and
 which are stored-only, would remove the whole class of problem. So would rejecting
@@ -159,14 +159,14 @@ testnet with the same contract, differing only in the marker:
 
 | Marker | Result |
 |---|---|
-| `{{profile.email_address}}` | `placeholder-unknown` — *"the calling profile is missing field 'email_address'"* → step fails |
+| `{{profile.email_address}}` | `placeholder-unknown`: *"the calling profile is missing field 'email_address'"* → step fails |
 | `{{profile.verified_contacts.email.value}}` | resolves → **HTTP 200**, `status: completed` |
 
 So nested markers are accepted, and the flat `email_address` is not a resolvable
-path at all — even though it is a documented Level-1 `UserInputProfile` field and
+path at all, even though it is a documented Level-1 `UserInputProfile` field and
 `user-upsert` accepts it without complaint. That combination is the real trap: the
 spec's own wording steers you to flat names, the write API accepts the flat name, and
-the failure arrives as *"missing field"* — which reads like absent data, so the
+the failure arrives as *"missing field"*, which reads like absent data, so the
 natural next move is to bind the field harder rather than to rename it. I spent
 significant time on the wrong problem because of it.
 
@@ -177,12 +177,12 @@ resolving them.
 
 ### 7. A contract's numeric id cannot be read back, and map ACLs are keyed on it
 
-Contract-scoped map ACLs are written as `{ only: [contractId] }` — the **numeric**
+Contract-scoped map ACLs are written as `{ only: [contractId] }`, the **numeric**
 id assigned at registration. Nothing in the SDK can read that id back afterwards:
 
 - `contracts.list()` returns canonical names only
 - `contracts.listDetailed()` returns `name`, `short_name`, `version`, `status`,
-  `descriptor` — no id
+  `descriptor`, and no id
 - `maps` exposes `getStatus` only, so the ACLs themselves cannot be read
 - `getActivityLog` entries carry `contract` as the canonical *name*
 
@@ -192,7 +192,7 @@ option. This project records it in the `config` map at registration.
 
 The consequence is sharper than it first looks: `hr-onboard init` re-applies every
 map ACL from scratch, so a second `init` on a tenant that already had a contract
-deployed resolved both contract-scoped ACLs to `{ only: [] }` — deny-all — silently
+deployed resolved both contract-scoped ACLs to `{ only: [] }`, deny-all, silently
 revoking the deployed contract's access to its own `secrets` and `onboarding-log`
 maps. Not a hypothetical: it is one re-run of a documented command away, and the
 contract keeps registering as `active` the whole time. Fixed here by reading the
@@ -201,7 +201,7 @@ recorded id and falling back to deny-all only when there is none.
 ### 8. Contract logs are off by default, which removes the only debugging signal
 
 `contracts.logs()` reads a ring buffer gated on the tenant's `log_max_entries`
-quota, which is **zero by default** — so it returns `{entries: []}` whether the
+quota, which is **zero by default**, so it returns `{entries: []}` whether the
 contract logged nothing or never ran at all. During #1 that was indistinguishable
 from a contract that was never invoked, on the one failure where a log line would
 have shortened the diagnosis from hours to minutes.
@@ -212,7 +212,7 @@ have shortened the diagnosis from hours to minutes.
 
 | # | What happened | Workaround used |
 |---|---|---|
-| 9 | `docs.terminal3.io` returned **403** to fetch after the first few requests — including `llms.txt` and the `.md` pages the docs tell AI assistants to read | Read the SDK's bundled `README.md` and `dist/index.d.ts` from `node_modules` instead |
+| 9 | `docs.terminal3.io` returned **403** to fetch after the first few requests, including `llms.txt` and the `.md` pages the docs tell AI assistants to read | Read the SDK's bundled `README.md` and `dist/index.d.ts` from `node_modules` instead |
 | 10 | The `wasm32-wasip2` target is not mentioned on the setup page and is not installed by default; the build fails with `can't find crate for core` | Found it in the `z-tenant-flight` README |
 | 11 | The Payroll Agent page in `llms.txt` renders empty | Used `Terminal-3/z-tenant-flight` as the reference |
 | 12 | The OpenAPI spec URLs in `llms.txt` don't resolve | Reconstructed the surface from the `.d.ts` |
@@ -223,8 +223,8 @@ have shortened the diagnosis from hours to minutes.
 
 ## Not a T3N defect, but worth knowing
 
-`next build` writes `T3N_API_KEY` into **Turbopack's build cache** — 11 files under
-`.next/cache/turbopack/*.sst` — because the value is read while Next collects page
+`next build` writes `T3N_API_KEY` into **Turbopack's build cache**, 11 files under
+`.next/cache/turbopack/*.sst`, because the value is read while Next collects page
 data. Measured on this project:
 
 | Location | Files containing the key |
@@ -239,7 +239,7 @@ copy to a host, and it is a build cache rather than an output, so its presence i
 archive is easy to miss. `.next/` is gitignored here; `rm -rf .next` before sharing
 a checkout.
 
-Nothing about this is Terminal 3's doing — it is a Next.js/Turbopack behaviour. It is
+Nothing about this is Terminal 3's doing. It is a Next.js/Turbopack behaviour. It is
 recorded because anyone else building a T3N agent on Next.js will hit it, and because
 "is my signing key in the build output?" deserves a measured answer rather than an
 assumption.
@@ -249,7 +249,7 @@ assumption.
 **#1** and **#2** are the ones worth fixing first: both make a correct deployment
 look broken, both surface as the same content-free `Internal error`, and between
 them they accounted for nearly all the time spent on this build. **#3** is the
-cheapest to fix — publishing the eight required field names would have made the
+cheapest to fix: publishing the eight required field names would have made the
 descriptor recoverable in one attempt instead of eight.
 
 **#6** is the one that cost the most wall-clock time, because every signal pointed

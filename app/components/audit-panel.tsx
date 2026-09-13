@@ -11,7 +11,7 @@ import { AsyncBody, Panel } from "./panel.tsx";
  * The distinction is the point of showing both panels side by side:
  * `onboarding-log` is what the *application* believes happened, while these rows
  * are what the *network* recorded. `actor` and `on_behalf_of` are host-stamped
- * from the verified dispatch context, so a contract cannot forge who acted —
+ * from the verified dispatch context, so a contract cannot forge who acted,
  * which is exactly the property a self-written log cannot provide.
  */
 export function AuditPanel() {
@@ -68,7 +68,7 @@ export function AuditPanel() {
                 </tbody>
               </table>
               {audit.next_seq !== null && (
-                <p className="muted small">More available — resume from seq {audit.next_seq}.</p>
+                <p className="muted small">More available: resume from seq {audit.next_seq}.</p>
               )}
             </>
           )

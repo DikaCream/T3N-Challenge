@@ -19,14 +19,14 @@ import type { ContractContext } from "./contract.ts";
  * The agent's flow, independent of who is driving it.
  *
  * Three phases, in this order and for a reason:
- *  1. plan      — decide steps from non-sensitive fields only
- *  2. preflight — check what each step still needs (no outbound call)
- *  3. run       — dry by default; only an explicit `live` sends anything
+ *  1. plan: decide steps from non-sensitive fields only
+ *  2. preflight: check what each step still needs (no outbound call)
+ *  3. run: dry by default; only an explicit `live` sends anything
  *
  * Phase 2 is the interesting one. An agent that discovers it lacks authority by
  * attempting the action and reading the failure has already crossed the line it
  * was trying not to cross. `preflight` answers the same question with no side
- * effect, and both the CLI and the web app go through this module — so the
+ * effect, and both the CLI and the web app go through this module, so the
  * guarantee cannot drift between the two surfaces.
  */
 

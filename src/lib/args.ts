@@ -49,7 +49,7 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
       }
       const next = argv[i + 1];
       // A following bare token is the value, unless it is itself a flag or we
-      // are at the end — `--live employee-1` must not swallow the positional.
+      // are at the end, so `--live employee-1` must not swallow the positional.
       if (next !== undefined && !next.startsWith("-")) {
         flags[body] = next;
         i += 1;

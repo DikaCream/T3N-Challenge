@@ -8,7 +8,7 @@ import type { MapSpec } from "../t3n/tenant.ts";
 /**
  * Key in the `config` map holding the numeric id of the deployed contract.
  *
- * The SDK offers no way to read a contract's id back — neither `list` nor
+ * The SDK offers no way to read a contract's id back: neither `list` nor
  * `listDetailed` carries it, map ACLs are write-only (only `getStatus` is
  * exposed), and the ledger records the canonical *name* rather than the id. Since
  * both contract-scoped ACLs are keyed on the id, tenant state is the only place
@@ -21,7 +21,7 @@ export const CONTRACT_ID_KEY = "contract_id";
  *
  * Extracted from the CLI's `init`/`seed` commands so the web app performs the
  * exact same steps rather than a parallel implementation. Nothing here reads
- * argv, prints, or touches the filesystem — that is the CLI's and the HTTP
+ * argv, prints, or touches the filesystem; that is the CLI's and the HTTP
  * layer's job respectively.
  */
 
@@ -29,14 +29,14 @@ export const CONTRACT_ID_KEY = "contract_id";
  * The three maps, and the access story for each.
  *
  * The split is the whole point of the design:
- *  - `config`  — endpoints and header names. Not secret, so operators may read it.
- *  - `secrets` — upstream credentials, readable **only** by the contract, so
+ *  - `config`: endpoints and header names. Not secret, so operators may read it.
+ *  - `secrets`: upstream credentials, readable **only** by the contract, so
  *                even the process that wrote them cannot read them back.
- *  - `onboarding-log` — written **only** by the contract, so a record cannot be
+ *  - `onboarding-log`: written **only** by the contract, so a record cannot be
  *                back-dated or edited by whoever holds the tenant key.
  *
  * `contractId` is `null` before the first deploy. Both contract-scoped ACLs then
- * resolve to an empty `only` list — deny-all until `deploy` points them at the
+ * resolve to an empty `only` list, deny-all until `deploy` points them at the
  * real numeric id. That ordering matters because the id is assigned at
  * registration time, so `deploy` must re-apply these.
  */
@@ -82,7 +82,7 @@ export async function provisionTenant(
 ): Promise<ProvisionResult> {
   // Re-point the contract-scoped ACLs at the contract that is actually deployed.
   //
-  // `mapSpecs(null)` resolves those ACLs to `{ only: [] }` — deny-all. That is
+  // `mapSpecs(null)` resolves those ACLs to `{ only: [] }`, deny-all. That is
   // right for a fresh tenant and catastrophic afterwards: `init` is a perfectly
   // reasonable thing to re-run, and doing so would silently revoke the deployed
   // contract's access to its own `secrets` and `onboarding-log` maps. So the
@@ -131,7 +131,7 @@ export interface SeedResult {
 /**
  * Move upstream credentials into the `secrets` map.
  *
- * Returns only the key names. The values never leave this function — they would
+ * Returns only the key names. The values never leave this function; they would
  * otherwise land in terminals, CI logs and screenshots.
  */
 export async function seedSecrets(

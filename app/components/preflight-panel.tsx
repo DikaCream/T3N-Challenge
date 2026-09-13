@@ -13,7 +13,7 @@ import { AsyncBody, Banner, Panel } from "./panel.tsx";
  * allow-list and evaluates it at dispatch; no import lets a contract ask in
  * advance. The candidate interface, `authorisation.check-authorized`, is
  * declared in the WIT package but is not provided to a tenant contract at
- * runtime — importing it makes the component un-instantiable. So a refused host
+ * runtime: importing it makes the component un-instantiable. So a refused host
  * surfaces at run time as a `denied` step, and the panel says so instead of
  * showing a green tick it cannot justify.
  *
@@ -46,7 +46,7 @@ export function PreflightPanel({ onConfigChanged }: { onConfigChanged?: () => vo
         </button>
       }
     >
-      <AsyncBody value={value} idle="Not checked yet — the contract must be deployed first.">
+      <AsyncBody value={value} idle="Not checked yet: the contract must be deployed first.">
         {({ contract, report }) => (
           <>
             <dl className="pairs">
@@ -58,8 +58,8 @@ export function PreflightPanel({ onConfigChanged }: { onConfigChanged?: () => vo
 
             <Banner tone={report.ready ? "good" : "warn"}>
               {report.ready
-                ? "CONFIGURED — every step has an endpoint"
-                : "NOT CONFIGURED — see the rows and lists below"}
+                ? "CONFIGURED: every step has an endpoint"
+                : "NOT CONFIGURED: see the rows and lists below"}
             </Banner>
 
             <table className="data">
@@ -119,7 +119,7 @@ export function PreflightPanel({ onConfigChanged }: { onConfigChanged?: () => vo
                   <span className="good">none</span>
                 ) : (
                   <span className="muted mono">
-                    {report.missing_secrets.join(", ")} — only a problem if the upstream requires auth
+                    {report.missing_secrets.join(", ")}: only a problem if the upstream requires auth
                   </span>
                 )}
               </dd>

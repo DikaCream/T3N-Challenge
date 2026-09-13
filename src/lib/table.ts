@@ -3,7 +3,7 @@
  *
  * Width is computed from the cells rather than guessed, so long endpoint hosts
  * push the columns out instead of clipping. Every call site passes pre-shortened
- * values — a table is a summary, not a dump.
+ * values, because a table is a summary, not a dump.
  */
 
 export type Cell = string | number | boolean | null | undefined;

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { CONTRACT_TAIL } from "./types.ts";
 
 /**
- * Filesystem-bound contract artifact lookup — build and deploy tooling only.
+ * Filesystem-bound contract artifact lookup, for build and deploy tooling only.
  *
  * The web app must never import this module: it reads `Cargo.toml` and the
  * `target/` directory, neither of which exists in a deployed serverless
@@ -40,8 +40,8 @@ export const WASM_PATH = join(
 );
 
 /**
- * Read the version straight out of `Cargo.toml` — the same file the Rust build
- * reads — so a version bump cannot half-apply.
+ * Read the version straight out of `Cargo.toml`, the same file the Rust build
+ * reads, so a version bump cannot half-apply.
  */
 export function contractVersion(): string {
   const manifestPath = join(CONTRACT_DIR, "Cargo.toml");

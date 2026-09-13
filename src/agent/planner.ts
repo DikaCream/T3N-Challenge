@@ -2,7 +2,7 @@ import type { AppConfig } from "../lib/config.ts";
 import type { Logger } from "../lib/log.ts";
 
 /**
- * The agent's decision layer — and the reason it is safe.
+ * The agent's decision layer, and the reason it is safe.
  *
  * Everything in this file runs on **non-sensitive** data only: an internal
  * employee reference, a role, a department and a start date. It never sees a
@@ -12,8 +12,8 @@ import type { Logger } from "../lib/log.ts";
  *
  * Two planners behind one interface, so the model is an optimisation rather
  * than a dependency:
- *  - `deterministic` — rule-based, always available, fully unit-testable.
- *  - `llm`           — used only when `LLM_API_KEY` is set, and only to pick
+ *  - `deterministic`: rule-based, always available, fully unit-testable.
+ *  - `llm`: used only when `LLM_API_KEY` is set, and only to pick
  *                      steps and assess risk. Any failure falls back to the
  *                      deterministic result instead of failing the run.
  */
@@ -86,7 +86,7 @@ export function deterministicPlan(request: OnboardingRequest, now = new Date()):
     notes.push("start_date could not be parsed, so urgency could not be assessed.");
   } else if (days < 0) {
     risk = "high";
-    notes.push(`start_date is ${Math.abs(days)} day(s) in the past — check this is a backfill.`);
+    notes.push(`start_date is ${Math.abs(days)} day(s) in the past; check this is a backfill.`);
   } else if (days <= 3) {
     risk = "high";
     notes.push(`Starts in ${days} day(s); no review window left.`);
@@ -112,7 +112,7 @@ interface LlmChoice {
 }
 
 /**
- * Ask a model to choose steps. Returns `null` on any problem — the caller then
+ * Ask a model to choose steps. Returns `null` on any problem; the caller then
  * keeps the deterministic plan, so a model outage degrades the agent rather
  * than breaking it.
  */
@@ -128,7 +128,7 @@ export async function llmPlan(
   const system = [
     "You plan employee onboarding for an enterprise HR system.",
     "You are given only non-sensitive fields. You must never ask for or infer",
-    "a name, national id, address, email or bank account — those are resolved",
+    "a name, national id, address, email or bank account: those are resolved",
     "inside a trusted execution environment by a contract, not by you.",
     "",
     `Available steps: ${KNOWN_STEPS.join(", ")}.`,

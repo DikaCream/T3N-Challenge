@@ -127,7 +127,7 @@ function renderOnboard(plan: Plan, record: OnboardingRecord, live: boolean): str
 
   lines.push("");
   lines.push(
-    `status: ${record.status}${live ? "" : "  (dry run — nothing was sent and nothing was written)"}`,
+    `status: ${record.status}${live ? "" : "  (dry run: nothing was sent and nothing was written)"}`,
   );
   lines.push(`contract v${record.contract_version}  contains_pii: ${String(record.contains_pii)}`);
   if (!live) lines.push("Re-run with --live to actually send these requests.");
@@ -206,7 +206,7 @@ export async function cmdList(context: Context): Promise<number> {
               new Date(record.recorded_at_secs * 1000).toISOString(),
             ]),
           ),
-          response.truncated ? "\n(more records exist — raise --limit)" : "",
+          response.truncated ? "\n(more records exist, raise --limit)" : "",
         ]
           .filter((line) => line !== "")
           .join("\n"),

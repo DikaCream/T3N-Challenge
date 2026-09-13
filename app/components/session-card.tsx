@@ -7,7 +7,7 @@ import type { ApiEnvelope, Async, SessionStatus } from "../lib/types.ts";
 /**
  * Operator session status.
  *
- * The browser never touches the SDK — it calls our own route, which holds the
+ * The browser never touches the SDK: it calls our own route, which holds the
  * T3N session server-side. That is the whole reason this app can be a dapp
  * without shipping a signing key to the client.
  */
@@ -82,7 +82,7 @@ function SessionBody({ session }: { session: SessionStatus }) {
       <div className={`banner ${session.contract.registered ? "good" : "warn"}`}>
         {session.contract.registered ? (
           <>
-            Contract registered — <span className="mono">{session.contract.name}</span> v
+            Contract registered: <span className="mono">{session.contract.name}</span> v
             {session.contract.version} ({session.contract.status})
           </>
         ) : (
@@ -103,7 +103,7 @@ function SessionBody({ session }: { session: SessionStatus }) {
         <dd>
           HRIS {session.targets.identityToken ? "set" : "none"} · payroll{" "}
           {session.targets.payrollToken ? "set" : "none"}
-          <span className="muted"> — held in the enclave-only secrets map</span>
+          <span className="muted">: held in the enclave-only secrets map</span>
         </dd>
       </dl>
     </>

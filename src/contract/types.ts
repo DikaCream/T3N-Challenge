@@ -65,7 +65,7 @@ export interface PreflightReport {
   contract_version: string;
   /**
    * `true` when every step is configured. It is deliberately not a claim that
-   * egress is authorised — see `egress_enforcement`.
+   * egress is authorised; see `egress_enforcement`.
    */
   ready: boolean;
   /** Where egress policy is actually enforced. */
@@ -91,7 +91,7 @@ export interface ContractInfo {
 /**
  * Registry tail: the contract is registered as `z:<tid>:employee-onboarding`.
  *
- * Lives in this module — which has no filesystem or SDK imports — so both the
+ * Lives in this module, which has no filesystem or SDK imports, so both the
  * Node CLI and the Next.js server routes can name the contract. The web app
  * must not reach `src/contract/artifacts.ts`, which is filesystem-bound.
  */
@@ -112,7 +112,7 @@ export const FUNCTIONS = {
 /**
  * Narrow an unknown RPC result.
  *
- * The SDK returns `unknown` for contract execution, which is correct — the
+ * The SDK returns `unknown` for contract execution, which is correct: the
  * caller owns the schema. Checking the required keys at the boundary means a
  * wrong-shaped payload fails here with the actual keys it received, instead of
  * producing `undefined` five lines later.

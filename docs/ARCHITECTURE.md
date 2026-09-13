@@ -26,7 +26,7 @@ split:
 
 Each column is a separate trust boundary, and each has a different failure mode.
 
-## Trust boundary 1 — agent → contract
+## Trust boundary 1: agent → contract
 
 **What crosses:** `employee_ref`, `role`, `department`, `start_date`, `currency`,
 `dry_run`, `steps`.
@@ -39,7 +39,7 @@ end.
 
 **Enforcement:** the contract's input types (`StartInput` in
 `src/onboarding.rs`) have no field for a name, an email or an account number. This
-is the strongest enforcement available at this boundary — not a policy, a type. A
+is the strongest enforcement available at this boundary, not a policy but a type. A
 caller wanting to send PII has nowhere to put it.
 
 **Why the planning happens on the agent side:** deciding *which steps to run* is a
@@ -48,7 +48,7 @@ needs non-sensitive context, so the model gets exactly that and nothing more. Th
 is why `src/agent/planner.ts` can safely be an LLM and still keep the privacy
 property.
 
-## Trust boundary 2 — contract → host
+## Trust boundary 2: contract → host
 
 This is the boundary that does the work, and it is the one most worth
 understanding.
@@ -68,11 +68,11 @@ Those bytes are what the contract holds in WASM memory. The contract then calls
 `http-with-placeholders`, and the **host** substitutes real values as the request
 is built, inside the enclave, after the bytes have left the guest. The contract
 sees the response status; it never sees the request as sent, and it never sees the
-response body — which matters, because an upstream can echo what it received.
+response body, which matters, because an upstream can echo what it received.
 
 **Consequence worth stating plainly:** the markers in the request body are not a
 redaction applied for display. They are the actual payload. A dry run printing
-`{{profile.first_name}}` is not hiding anything — that string is genuinely all the
+`{{profile.first_name}}` is not hiding anything; that string is genuinely all the
 contract ever has.
 
 ### Why each step declares its own placeholders
@@ -87,11 +87,11 @@ is load-bearing in three places:
 3. `build_body` produces the markers, and a unit test asserts every declared step
    has a template.
 
-The alternative — discovering missing profile fields from a mid-run
-`PlaceholderUnknown` — turns a predictable configuration problem into a partial
+The alternative, discovering missing profile fields from a mid-run
+`PlaceholderUnknown`, turns a predictable configuration problem into a partial
 failure, half-way through writing an HRIS record.
 
-## Trust boundary 3 — host → upstream
+## Trust boundary 3: host → upstream
 
 Outbound egress is authorised **per caller**, not per contract: the contract
 declaring `http-with-placeholders` in its WIT world grants it the *capability*,
@@ -107,15 +107,15 @@ by crossing the boundary it was trying to respect.
 this build.** `host:interfaces/authorisation@2.1.0` is declared in the host's
 `world interfaces`, but importing it makes the component un-instantiable: every
 dispatch then fails with a bare `RPC Error: Internal error` and no further detail.
-Removing that one import — nothing else changed — makes the same crate dispatch
+Removing that one import, with nothing else changed, makes the same crate dispatch
 normally. See [`BUGS.md`](BUGS.md) #1 for the bisection.
 
 So egress authorisation is discovered at dispatch, from
 `http-with-placeholders`'s typed `egress-denied` variant, and mapped to
 `StepError::Denied`. `StepError` keeps `Denied` separate from `Failed` because the
 operator's response differs: one is resolved with a grant, the other with a bug
-hunt. `preflight` therefore reports what it can genuinely verify — endpoint,
-credential, required profile fields — and sets `egress_authorised: null` with an
+hunt. `preflight` therefore reports what it can genuinely verify (endpoint,
+credential, required profile fields) and sets `egress_authorised: null` with an
 explicit note, rather than showing a green tick it cannot justify.
 
 A fresh tenant is deny-all, so the first live run is refused until a grant names
@@ -136,7 +136,7 @@ defaulted:
 
 | Map | Readers | Writers | Reasoning |
 |---|---|---|---|
-| `config` | `all` | `{ only: [] }` | Holds endpoints and header *names* — not secret. Operators need to read it to debug. Only the control plane writes it, so a stray contract cannot retarget a step. |
+| `config` | `all` | `{ only: [] }` | Holds endpoints and header *names*, not secrets. Operators need to read it to debug. Only the control plane writes it, so a stray contract cannot retarget a step. |
 | `secrets` | `{ only: [contractId] }` | `{ only: [] }` | Upstream credentials. The enclave reads them; nothing else can, **including the process that wrote them**. |
 | `onboarding-log` | `all` | `{ only: [contractId] }` | The business record. Written only by the contract so a record cannot be back-dated by whoever holds the tenant key; readable widely because it contains no PII by construction. |
 
@@ -160,12 +160,12 @@ at registration time and differs on each registration. So deployment order is no
 cosmetic:
 
 1. `init` creates the maps. The two contract-scoped ACLs resolve to
-   `{ only: [] }` — deny-all — because no contract id exists yet.
+   `{ only: [] }`, deny-all, because no contract id exists yet.
 2. `deploy` registers the contract, learns its id, and re-points both ACLs at it.
 3. `seed` writes credentials into `secrets`, which only the contract can now read.
 
 Run `seed` before `deploy` and the secret is written into a map nobody can read.
-This ordering is enforced by documentation and by `deploy` being idempotent — it
+This ordering is enforced by documentation and by `deploy` being idempotent: it
 re-applies every ACL on each run, so a re-deploy re-points rather than orphaning.
 
 ## Why two planners
@@ -173,7 +173,7 @@ re-applies every ACL on each run, so a re-deploy re-points rather than orphaning
 `src/agent/planner.ts` has a deterministic planner and an optional LLM, behind one
 interface, with the deterministic one as the fallback. That is not hedging:
 
-- The LLM's job is narrow — pick steps, assess review risk — on four non-sensitive
+- The LLM's job is narrow (pick steps, assess review risk) on four non-sensitive
   fields. A model that is unavailable should not stop a hire from being onboarded.
 - The model's output is untrusted input. `validateSteps` filters it against the
   steps actually compiled into the contract, so a hallucinated step name is dropped
@@ -185,19 +185,19 @@ interface, with the deterministic one as the fallback. That is not hedging:
 
 | Function | Why it exists as its own entry point |
 |---|---|
-| `contract-info` | Pure — no host calls, so it answers *before* `init` has run. "What do you need from me?" is the first question an operator asks, and it should not require a configured tenant to answer. |
-| `preflight` | Separates *can I* from *do it*. No side effects, no writes, no outbound calls. It reports configuration, not permission — permission is the host's call at dispatch, and the interface that would expose it is unusable (`BUGS.md` #1). |
+| `contract-info` | Pure, with no host calls, so it answers *before* `init` has run. "What do you need from me?" is the first question an operator asks, and it should not require a configured tenant to answer. |
+| `preflight` | Separates *can I* from *do it*. No side effects, no writes, no outbound calls. It reports configuration, not permission: permission is the host's call at dispatch, and the interface that would expose it is unusable (`BUGS.md` #1). |
 | `start-onboarding` | `dry_run` defaults to `true`; the safe path is the default path. |
-| `get-onboarding-status` | A dry run leaves no record — so `found: false` after a dry run is correct behaviour, not a bug. The alternative (writing plans into the log) would make the log unable to distinguish a plan from a fact. |
-| `list-onboardings` | Keys are `onboard:<ref>`, so the prefix range `["onboard:", "onboard;")` enumerates the map with one bounded scan. A record that fails to decode is skipped rather than failing the page — one bad row must not hide the other 99. |
+| `get-onboarding-status` | A dry run leaves no record, so `found: false` after a dry run is correct behaviour, not a bug. The alternative (writing plans into the log) would make the log unable to distinguish a plan from a fact. |
+| `list-onboardings` | Keys are `onboard:<ref>`, so the prefix range `["onboard:", "onboard;")` enumerates the map with one bounded scan. A record that fails to decode is skipped rather than failing the page; one bad row must not hide the other 99. |
 
 ## Failure modes, and what each looks like
 
 | Failure | Surfaced as | Why it is surfaced that way |
 |---|---|---|
-| Egress not authorised | `status: denied`, host named, per step | A denial is discovered at dispatch — the host holds the allow-list and no import lets a contract ask first. `Denied` stays distinct from `Failed` because the fix is a grant, not a bug hunt |
+| Egress not authorised | `status: denied`, host named, per step | A denial is discovered at dispatch: the host holds the allow-list and no import lets a contract ask first. `Denied` stays distinct from `Failed` because the fix is a grant, not a bug hunt |
 | Profile field missing | `placeholder not permitted` / `profile is missing field 'x'` | The host's typed errors are forwarded verbatim; they name the field, never a value |
-| Upstream returned 4xx/5xx | `status: failed`, `http_status: N` | The response **body is discarded** — an upstream can echo the PII it received |
+| Upstream returned 4xx/5xx | `status: failed`, `http_status: N` | The response **body is discarded**, because an upstream can echo the PII it received |
 | Upstream unreachable | `status: failed`, reason from the host | Same reason; no partial record is written |
 | Config key absent | Error naming the key and the `init` command | The most likely first-run failure deserves a fix, not a stack trace |
 | Partial success | Record `status: partial` | `summarise` distinguishes all-failed from some-failed, because "the payroll step failed but the seat exists" needs different handling from a total failure |
@@ -207,7 +207,7 @@ interface, with the deterministic one as the fallback. That is not hedging:
 - **No PII field beyond what the platform documents as resolvable.** The contract
   uses `first_name`, `last_name`, `ssn`, `address` and `country_of_residence` from
   the SDK's `UserInputProfile`, plus the email at its real path,
-  **`verified_contacts.email.value`** — nested, and deliberately so. A bank-account
+  **`verified_contacts.email.value`**, nested, and deliberately so. A bank-account
   placeholder would have been more impressive on a slide and would have been
   guesswork: no such field is documented anywhere, and a wrong guess fails at runtime
   inside the enclave.
@@ -215,7 +215,7 @@ interface, with the deterministic one as the fallback. That is not hedging:
   An earlier revision of this contract used a flat `{{profile.email_address}}` and
   avoided the nested path, because the WIT spec's own wording calls nested markers
   *malformed*. That was wrong, and it is what kept `provision-identity` failing with
-  *"the calling profile is missing field 'email_address'"* — an error that reads like
+  *"the calling profile is missing field 'email_address'"*, an error that reads like
   absent data rather than a wrong field name. Both directions were tested; see
   [`BUGS.md`](BUGS.md) #6.
 - **No web UI.** The task is an enterprise integration, and a CLI is the surface

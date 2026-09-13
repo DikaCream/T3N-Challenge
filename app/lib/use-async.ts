@@ -9,7 +9,7 @@ import type { Async } from "./types.ts";
  *
  * Deliberately minimal: no caching, no dedupe, no retry. Every panel here is
  * triggered by a person pressing a button or loading the page, so the only thing
- * that must be right is not setting state after unmount — which is what the
+ * that must be right is not setting state after unmount, which is what the
  * `cancelled` flag and the ref guard handle.
  */
 export function useAsync<T>(
@@ -19,7 +19,7 @@ export function useAsync<T>(
   const [value, setValue] = useState<Async<T>>({ state: "idle" });
 
   // The task identity changes every render if a caller passes an inline arrow,
-  // so it is held in a ref rather than listed as a dependency — otherwise
+  // so it is held in a ref rather than listed as a dependency; otherwise
   // `auto` would re-fire on every render.
   const taskRef = useRef(task);
   taskRef.current = task;

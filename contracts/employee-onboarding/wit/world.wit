@@ -1,4 +1,4 @@
-/// hr-onboard WIT world — privacy-preserving employee onboarding.
+/// hr-onboard WIT world: privacy-preserving employee onboarding.
 ///
 /// Imports required host capabilities:
 /// - tenant-context: the tenant DID, so the contract can name its own
@@ -35,9 +35,9 @@ world hr-onboard {
 
 interface contracts {
     /// Standard 3-field envelope used by every contract callable from the node.
-    /// `input` — JSON-serialised request payload specific to the function.
-    /// `user-profile` — always None for tenant contracts (hardcoded at dispatch).
-    /// `context` — JSON-serialised DynamicContext (node-minted, trusted).
+    /// `input`: JSON-serialised request payload specific to the function.
+    /// `user-profile`: always None for tenant contracts (hardcoded at dispatch).
+    /// `context`: JSON-serialised DynamicContext (node-minted, trusted).
     record generic-input {
         input: option<list<u8>>,
         user-profile: option<list<u8>>,
@@ -51,7 +51,7 @@ interface contracts {
     /// Input: `{}`
     contract-info: func(req: generic-input) -> result<list<u8>, string>;
 
-    /// Answer "what is missing?" — reports, per step, whether an endpoint is
+    /// Answer "what is missing?", and report per step whether an endpoint is
     /// configured, whether a credential is present, and the host it will egress
     /// to, plus which config keys, secret keys and profile fields are absent.
     ///

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 /**
  * Create or reconcile the tenant maps, then write the step endpoints.
  *
- * Idempotent — safe to press twice. It does not touch `secrets`: credentials come
+ * Idempotent, and safe to press twice. It does not touch `secrets`: credentials come
  * from the server environment via the CLI's `seed`, and there is deliberately no
  * endpoint that accepts a secret from a browser.
  */

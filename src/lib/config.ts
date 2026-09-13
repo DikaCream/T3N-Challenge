@@ -73,7 +73,7 @@ export function loadConfig(options: LoadOptions = {}): AppConfig {
   const config: AppConfig = {
     apiKey: required(
       "T3N_API_KEY",
-      "Claim one at https://www.terminal3.io/claim-page (shown once — copy it immediately), then put it in .env.",
+      "Claim one at https://www.terminal3.io/claim-page (shown once, so copy it immediately), then put it in .env.",
     ),
     env: oneOf("T3N_ENV", ENVIRONMENTS, "testnet"),
     logLevel: oneOf("T3N_LOG_LEVEL", LOG_LEVELS, "info"),

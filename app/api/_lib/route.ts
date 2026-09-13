@@ -51,7 +51,7 @@ export function fail(error: unknown): NextResponse {
 /**
  * Wrap a handler so no route ever has to remember the try/catch.
  *
- * Errors are logged server-side at debug level only — the response body carries
+ * Errors are logged server-side at debug level only; the response body carries
  * the message, but a stack trace stays out of it.
  */
 export function handler<T extends unknown[]>(

@@ -24,7 +24,7 @@ export interface Context {
  * Config, logger, session and tenant client are assembled in this order because
  * each depends on the previous one: the log level comes from config, and the
  * tenant client needs the authenticated session it dispatches through.
- * Commands receive a fully working context or an exception — never a half-built
+ * Commands receive a fully working context or an exception, never a half-built
  * one to check for nulls.
  */
 export async function withContext(

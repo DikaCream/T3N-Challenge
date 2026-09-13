@@ -2,7 +2,7 @@
  * The operator session status, as `/api/session` returns it.
  *
  * Its own module because `app/lib/types.ts` re-exports server types and this
- * shape is purely a route payload — keeping it separate makes it obvious which
+ * shape is purely a route payload, and keeping it separate makes it obvious which
  * types cross the boundary and which are mirrored from the enclave.
  */
 

@@ -88,7 +88,7 @@ export function RecordsPanel() {
             <>
               <RecordTable records={records.records} />
               {records.truncated && (
-                <p className="muted small">More records exist — the page size was hit.</p>
+                <p className="muted small">More records exist: the page size was hit.</p>
               )}
             </>
           );

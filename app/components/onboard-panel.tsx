@@ -14,7 +14,7 @@ import { AsyncBody, Banner, Panel } from "./panel.tsx";
  * the agent is given: an HR-internal reference, a role, a department and a start
  * date. There is no field for a name or an account number to type into.
  *
- * The dry run is the default, and its output is the evidence — the request
+ * The dry run is the default, and its output is the evidence: the request
  * bodies below still contain `{{profile.*}}` markers, which is what proves the
  * sensitive values were never in this process.
  */
@@ -111,7 +111,7 @@ export function OnboardPanel() {
               onChange={(event) => set("live")(event.target.checked)}
             />
             <span>
-              Live — actually send. Without this nothing leaves the enclave and no record is written.
+              Live: actually send. Without this nothing leaves the enclave and no record is written.
             </span>
           </label>
         </div>
@@ -125,7 +125,7 @@ export function OnboardPanel() {
                 : "Run dry onboarding"}
           </button>
           <span className="muted small">
-            No name, national id, address or email is sent from here — there is no field for one.
+            No name, national id, address or email is sent from here: there is no field for one.
           </span>
         </div>
       </form>
@@ -154,7 +154,7 @@ export function OnboardPanel() {
 
             {outcome.blocked && (
               <>
-                <Banner tone="bad">Refused — nothing was sent</Banner>
+                <Banner tone="bad">Refused: nothing was sent</Banner>
                 <pre className="mono wrap boxed">{outcome.blockedReason}</pre>
               </>
             )}
@@ -164,7 +164,7 @@ export function OnboardPanel() {
                 <h3>Result</h3>
                 <Banner tone={outcome.record.status === "completed" ? "good" : "warn"}>
                   {outcome.record.status}
-                  {outcome.record.dry_run ? " (dry run — nothing sent, nothing written)" : ""}
+                  {outcome.record.dry_run ? " (dry run: nothing sent, nothing written)" : ""}
                 </Banner>
 
                 <table className="data">
@@ -206,7 +206,7 @@ export function OnboardPanel() {
                     <p className="muted small">
                       The exact bytes the enclave would send. Every{" "}
                       <span className="mono">{"{{profile.*}}"}</span> marker is substituted by the
-                      host inside the enclave, after this output was produced — if a real name or
+                      host inside the enclave, after this output was produced. If a real name or
                       account number appeared here, the design would have failed visibly.
                     </p>
                     {outcome.record.steps.map((step) => (

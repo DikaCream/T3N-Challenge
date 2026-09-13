@@ -6,7 +6,7 @@
  * Why this exists: the node refuses to register a version that is not strictly
  * higher than the registered one (`version 0.1.1 is not higher than current
  * version 0.1.1`). Deciding *before* calling is what lets `deploy` be safe to
- * re-run — at the same version it reconciles instead of erroring, and on a
+ * re-run: at the same version it reconciles instead of erroring, and on a
  * downgrade it says so in one line instead of surfacing a transport error.
  *
  * Deliberately not a full SemVer 2.0.0 implementation. A pre-release suffix is

@@ -10,11 +10,11 @@ import { cmdList, cmdOnboard, cmdStatus } from "./commands/run.ts";
 import { cmdAudit, cmdGrant, cmdGrants } from "./commands/trust.ts";
 
 const HELP = `
-hr-onboard — privacy-preserving employee onboarding on Terminal 3.
+hr-onboard: privacy-preserving employee onboarding on Terminal 3.
 
 The agent decides which steps to run using only non-sensitive fields. A TEE
 contract then performs them, and the employee's name, national id, address and
-email are substituted inside the enclave by the host — they are never arguments,
+email are substituted inside the enclave by the host; they are never arguments,
 never local variables, and never in this process's memory.
 
 SETUP
@@ -69,7 +69,7 @@ interface Command {
 /**
  * Commands that build their own context.
  *
- * `withContext` does config load, connect, and tenant client construction — so
+ * `withContext` does config load, connect, and tenant client construction, so
  * every command listed here is guaranteed a working session, and a
  * configuration problem is reported before any network call is attempted.
  */

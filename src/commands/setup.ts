@@ -94,7 +94,7 @@ export async function cmdDeploy(context: Context): Promise<number> {
 
   // Decide before registering. The node refuses a version that is not strictly
   // higher than the registered one, and treating that refusal as a crash would
-  // make `deploy` fail on a re-run — which is exactly when an operator reaches
+  // make `deploy` fail on a re-run, which is exactly when an operator reaches
   // for it, because it is the command that answers "what state is my tenant in?".
   const deployed = await registeredVersion(tenant, CONTRACT_TAIL);
   const relation = deployed === null ? 1 : compareSemver(version, deployed.version);
@@ -102,7 +102,7 @@ export async function cmdDeploy(context: Context): Promise<number> {
   if (relation < 0) {
     throw new Error(
       `Local contract version ${version} is older than the deployed ${deployed?.version ?? "?"}. ` +
-        "The node refuses a downgrade — bump past it in `Cargo.toml` and `src/lib.rs`.",
+        "The node refuses a downgrade. Bump past it in `Cargo.toml` and `src/lib.rs`.",
     );
   }
 
@@ -177,7 +177,7 @@ export async function cmdDeploy(context: Context): Promise<number> {
     [
       registering
         ? `Registered ${CONTRACT_TAIL} v${version} (contract_id ${contractId})`
-        : `Already registered v${version} — nothing to register. Reconciled state instead.`,
+        : `Already registered v${version}. Nothing to register; reconciled state instead.`,
       `Artifact  ${artifact.sizeBytes} bytes  ${artifact.wasmPath}`,
       "descriptor published (required for dispatch)",
       "",

@@ -9,7 +9,7 @@ import { CONTRACT_TAIL } from "./types.ts";
  * returns success and `contracts list` reports `status: "active"`, but until a
  * descriptor is published every `execute` fails with a bare
  * `RPC Error: Internal error` and no further detail. A descriptor is therefore a
- * required part of deployment, not optional metadata — `deploy` publishes one on
+ * required part of deployment, not optional metadata: `deploy` publishes one on
  * every run.
  *
  * ## The wire shape the node enforces
@@ -118,7 +118,7 @@ const FUNCTIONS: FunctionDescriptor[] = [
       "Run or simulate the onboarding for one employee. Carries no employee PII: the request " +
       "names the employee by an HR-internal reference, and the employee's name, national id, " +
       "address and personal email are substituted by the host inside the enclave when the " +
-      "outbound request is built. Dry run by default — nothing is sent and no record is written " +
+      "outbound request is built. Dry run by default: nothing is sent and no record is written " +
       "until the caller explicitly sets `dry_run: false`.",
     mutates: true,
     auth: PUBLIC_AUTH,

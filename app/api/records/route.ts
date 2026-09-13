@@ -13,8 +13,8 @@ export const dynamic = "force-dynamic";
  * `?employee=<ref>` returns one record; without it, a page of records.
  *
  * Reminder that shapes the UI: a dry run writes nothing, so `found: false` after
- * a dry run is correct behaviour rather than a bug. The alternative — recording
- * plans alongside facts — would make the log unable to tell the two apart.
+ * a dry run is correct behaviour rather than a bug. The alternative, recording
+ * plans alongside facts, would make the log unable to tell the two apart.
  */
 export const GET = handler(async (request: Request) => {
   const context = await operatorContext();

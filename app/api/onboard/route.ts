@@ -8,14 +8,14 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Plan, preflight, then run — dry unless `live` is explicitly true.
+ * Plan, preflight, then run: dry unless `live` is explicitly true.
  *
  * Three independent gates stand between a click and an outbound request:
  *  1. `live` must be present in the body and true (this UI never infers it)
  *  2. `ONBOARD_ALLOW_LIVE=true` must be set on the deployment
  *  3. the contract's own `dry_run` defaults to true
  *
- * Field validation happens in the contract, which is the authority — the checks
+ * Field validation happens in the contract, which is the authority; the checks
  * here only exist to turn an obviously malformed request into a 400 instead of a
  * round trip into the enclave.
  */

@@ -58,7 +58,7 @@ export default function Console() {
           <li>
             <strong>The markers are the payload.</strong> Request bodies contain literal{" "}
             <span className="mono">{"{{profile.first_name}}"}</span>. That is not a redaction applied
-            for display — it is genuinely all the contract ever holds.
+            for display; it is genuinely all the contract ever holds.
           </li>
           <li>
             <strong>The host substitutes, not the app.</strong> Resolution happens after the bytes

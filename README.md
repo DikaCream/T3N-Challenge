@@ -1,10 +1,10 @@
-# hr-onboard — privacy-preserving employee onboarding on Terminal 3
+# hr-onboard: privacy-preserving employee onboarding on Terminal 3
 
 An enterprise onboarding agent where **the AI never sees the employee's data**.
 
 The agent decides *which* onboarding steps to run, using only an internal employee
-reference, a role, a department and a start date. The actual work — creating the
-HRIS record, enrolling the hire with payroll — runs inside a Terminal 3 TEE
+reference, a role, a department and a start date. The actual work, creating the
+HRIS record and enrolling the hire with payroll, runs inside a Terminal 3 TEE
 contract, and the employee's name, national id, address and personal email are
 substituted **by the host, inside the enclave, at the moment the outbound request
 is built**. They are never arguments, never local variables, and never bytes in
@@ -17,12 +17,12 @@ This repository is a submission to the
 
 | Surface | Who it is for | How it runs |
 |---|---|---|
-| **Web console** | an HR operator, in a browser | `npm run dev` — Next.js App Router, SDK on the server only |
-| **CLI** | an operator or a scheduled job | `npm run cli -- <command>` — no bundler involved |
+| **Web console** | an HR operator, in a browser | `npm run dev`: Next.js App Router, SDK on the server only |
+| **CLI** | an operator or a scheduled job | `npm run cli -- <command>`: no bundler involved |
 
 Both call the same functions in [`src/services/`](src/services). That is the point:
-the safety rules — the dry-run default, the contract-id ACL rewiring, the
-planner's validation — exist in exactly one place, so a web request and a cron job
+the safety rules, the dry-run default, the contract-id ACL rewiring and the
+planner's validation, exist in exactly one place, so a web request and a cron job
 cannot drift apart. The web tier is a thin HTTP + UI shell over the code the CLI
 already uses.
 
@@ -30,7 +30,7 @@ The T3N SDK loads a `.wasm` component from its own package directory at runtime.
 The T3N docs flag this as breaking under Next.js/Turbopack, Vite and older
 Webpack, and recommend keeping it out of a bundler. This app does exactly that:
 `serverExternalPackages: ["@terminal3/t3n-sdk"]` in [`next.config.ts`](next.config.ts)
-keeps the SDK on the Node runtime, and `T3N_API_KEY` — an Ethereum private key — is
+keeps the SDK on the Node runtime, and `T3N_API_KEY`, an Ethereum private key, is
 read only inside server route handlers. No client component ever receives it.
 
 ---
@@ -41,7 +41,7 @@ Onboarding is the single moment an enterprise moves a new hire's most sensitive
 data between systems. Every implementation of that flow has the same shape: the
 data passes through application code, application logs, and whoever operates the
 application. Compliance teams then try to bound the blast radius with access
-reviews and retention policies — paperwork applied to a structural problem.
+reviews and retention policies. That is paperwork applied to a structural problem.
 
 The structural fix is to stop the application from ever holding the data. That is
 what a TEE with host-side placeholder resolution gives you, and it is what this
@@ -58,9 +58,9 @@ Two steps, both configurable without a redeploy:
 
 The contract carries no PII in either direction:
 
-- **In** — `start-onboarding` takes `employee_ref`, `role`, `department`,
+- **In**: `start-onboarding` takes `employee_ref`, `role`, `department`,
   `start_date`. No human values.
-- **Out** — every response contains step status, host, HTTP status and (on a dry
+- **Out**: every response contains step status, host, HTTP status and (on a dry
   run) the *templated* request bodies. Upstream response bodies are dropped on
   purpose, because an upstream can echo the resolved PII straight back.
 
@@ -74,7 +74,7 @@ is every place a value could travel, and why it does not:
 | Agent → contract | The agent's inputs are non-sensitive by construction (`employee_ref` is HR-internal). |
 | Contract body construction | Bodies are built with `{{profile.<field>}}` markers. The Rust unit tests assert the markers are present. |
 | Outbound call | `http-with-placeholders` resolves markers host-side, after the bytes leave WASM. |
-| Upstream response | Never forwarded to the caller — only `resp.code` is read. |
+| Upstream response | Never forwarded to the caller; only `resp.code` is read. |
 | Stored record | `contains_pii: false` is a field, not a promise. Records hold status only. |
 | Credentials | Upstream API keys live in the `secrets` map, whose readers are `{ only: [contractId] }`. |
 
@@ -94,7 +94,7 @@ rustup target add wasm32-wasip2
 # 1. Dependencies
 npm install
 
-# 2. Your key — claim one at https://www.terminal3.io/claim-page (shown once)
+# 2. Your key: claim one at https://www.terminal3.io/claim-page (shown once)
 cp .env.example .env
 $EDITOR .env          # set T3N_API_KEY at minimum
 
@@ -120,7 +120,7 @@ npm run cli -- onboard \
 #
 # A fresh tenant has DENY-ALL egress, so a live run is refused until a grant
 # names the hosts. For an individual tenant the grant must be bound to your own
-# DID — `OrgDataClient.setAgentEgress` is the documented egress API but it
+# DID: `OrgDataClient.setAgentEgress` is the documented egress API but it
 # requires an org. See docs/BUGS.md #4.
 DID="$(npm run cli -- whoami --json | node -e 'process.stdin.once("data",d=>console.log(JSON.parse(d).did))')"
 npm run cli -- grant --agent "$DID" --hosts httpbin.org
@@ -138,7 +138,7 @@ does not exist until registration.
 `deploy` is safe to re-run, and the node's own rule is why it has to be: a version
 that is not strictly higher than the registered one is refused outright
 (`version 0.1.1 is not higher than current version 0.1.1`). So `deploy` compares
-first — at the same version it reconciles the descriptor and the ACLs instead of
+first: at the same version it reconciles the descriptor and the ACLs instead of
 re-registering, on a downgrade it says so in one line, and only a genuinely newer
 version registers.
 
@@ -156,8 +156,8 @@ and #3.
 
 The two steps resolve different profile fields, and one of them is a **nested**
 path: the email is `{{profile.verified_contacts.email.value}}`, not a flat
-`email_address`. The flat name is a valid *input* field for `user-upsert` — it is
-ever in the documented Level-1 set — but it is not a resolvable path, and using it
+`email_address`. The flat name is a valid *input* field for `user-upsert`, and it
+appears in the documented Level-1 set, but it is not a resolvable path, and using it
 yields `placeholder-unknown` ("the calling profile is missing field"), which reads
 like missing data rather than a wrong field name. See
 [`docs/BUGS.md`](docs/BUGS.md) #6.
@@ -181,8 +181,8 @@ deliberately operator-only:
 | Audit | `GET /api/audit` | The ledger's own record of dispatches |
 
 **Contract registration stays CLI-only (`npm run cli -- deploy`).** It needs the
-compiled `.wasm` artifact and rewrites map ACLs — a build-and-provision step, not
-something a browser button should be able to trigger.
+compiled `.wasm` artifact and rewrites map ACLs. It is a build-and-provision step,
+not something a browser button should be able to trigger.
 
 **`live` is off by default in the web tier** and must be enabled explicitly with
 `ONBOARD_ALLOW_LIVE=true`. A publicly reachable deployment should not be able to
@@ -228,7 +228,7 @@ status: completed   contract v0.1.2   contains_pii: false
 
 Both steps are real HTTPS POSTs that left the enclave with the employee's name,
 national id, address, country and personal email substituted host-side. **Those
-values never existed in this process** — the dry run above is what the contract
+values never existed in this process**. The dry run above is what the contract
 held. `hr-onboard audit` shows the whole history in the network's own ledger: 32
 dispatches, 9 of them `error` (all from the unusable `authorisation` import), then
 23 `success`.
@@ -269,8 +269,8 @@ progress and diagnostics go to stderr.
                                   HRIS / payroll endpoints
 ```
 
-Details — trust boundaries, the map access model, and why each decision was made
-— are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
+Details, including trust boundaries, the map access model and why each decision
+was made, are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
 ## Security model
 
@@ -279,8 +279,8 @@ Details — trust boundaries, the map access model, and why each decision was ma
   outbound call is denied.
 - **Egress is deny-all until granted.** A fresh tenant can reach nothing. Until
   a delegation grant names the hosts, every outbound call is refused by the host.
-- **Honest preflight.** `preflight` reports everything it can actually verify —
-  endpoint configured, credential present, profile fields the steps need — and
+- **Honest preflight.** `preflight` reports everything it can actually verify
+  (endpoint configured, credential present, profile fields the steps need) and
   deliberately does **not** claim to know egress authorisation, because that is
   decided at dispatch. The one interface that would expose it, `authorisation`,
   is not provided to tenant contracts: importing it makes the component
@@ -300,7 +300,7 @@ Details — trust boundaries, the map access model, and why each decision was ma
   login challenge locally and is never sent anywhere.
 - **But `.next/` does hold it, so never ship it.** Measured: the key appears in
   **0** files under `.next/static/` and `.next/server/`, so no client bundle and no
-  server output carries it — which is the property that actually matters. It *is*
+  server output carries it, which is the property that actually matters. It *is*
   written into Turbopack's build cache (`.next/cache/turbopack/*.sst`, 11 files),
   because the value is read while Next collects page data. `.next/` is gitignored,
   but if you zip or archive the project for anyone, run `rm -rf .next` first.
@@ -319,7 +319,7 @@ Details — trust boundaries, the map access model, and why each decision was ma
 │   ├── page.tsx                      operator dashboard
 │   ├── components/                   one panel per operation
 │   ├── lib/                          client fetch wrappers + view types
-│   └── api/                          server routes — the only place the SDK runs
+│   └── api/                          server routes: the only place the SDK runs
 │       ├── session/  provision/      connect, then reconcile the tenant maps
 │       ├── preflight/  onboard/      ask permission, then act
 │       └── records/  audit/          read back stored records and dispatches
@@ -350,15 +350,15 @@ npm run build         # production build of the web console
 
 # Screenshot the console, for the submission write-up.
 # Captures the full page and one image per panel; no extra dependency.
-# Two panels are idle until asked, so it presses their buttons first — those
+# Two panels are idle until asked, so it presses their buttons first. Those
 # images show a real run, not an empty form. Also writes console-text.txt,
 # which is greppable where a PNG is not. Costs one dry-run invocation.
 node scripts/capture-console.mjs http://localhost:3100/ screenshots
 ```
 
 Host calls are isolated behind `#[cfg(target_arch = "wasm32")]`, so the contract's
-decision logic — input validation, step selection, request-body construction,
-status roll-up, the scan-range invariant — is unit-testable with a plain
+decision logic (input validation, step selection, request-body construction,
+status roll-up, the scan-range invariant) is unit-testable with a plain
 `cargo test` and no TEE.
 
 ## Troubleshooting
@@ -368,9 +368,9 @@ status roll-up, the scan-range invariant — is unit-testable with a plain
 | `Contract artifact not found` | Wasm not built | `rustup target add wasm32-wasip2 && npm run build:contract` |
 | `Missing T3N_API_KEY` | No `.env` | `cp .env.example .env` and fill it in |
 | `egress denied for host 'x'` | Deny-all default; no grant covers that host | `hr-onboard grant --agent <your own did> --hosts x` |
-| `RPC Error: Internal error` on **every** call | No descriptor published, or the contract imports `authorisation` | Re-run `deploy` (it publishes the descriptor); check the imports in `wit/world.wit` — see `docs/BUGS.md` #1 and #2 |
+| `RPC Error: Internal error` on **every** call | No descriptor published, or the contract imports `authorisation` | Re-run `deploy` (it publishes the descriptor); check the imports in `wit/world.wit`. See `docs/BUGS.md` #1 and #2 |
 | `descriptor malformed: field 'y' must be …` | Descriptor missing a required field | The validator names it; all eight are listed in `docs/BUGS.md` #3 |
-| `the calling profile is missing field 'x'` | The profile lacks that field, **or the field name is wrong for how the host stores it** | Bind it via `submitUserInput`. Note the email is not `email_address` but the nested `verified_contacts.email.value` — see `docs/BUGS.md` #6 |
+| `the calling profile is missing field 'x'` | The profile lacks that field, **or the field name is wrong for how the host stores it** | Bind it via `submitUserInput`. Note the email is not `email_address` but the nested `verified_contacts.email.value`. See `docs/BUGS.md` #6 |
 | `no user profile is bound to this call` | Invoked outside a user session | Run through `onboard`, not a direct dispatch |
 | `SSN must be 9 digits, optionally grouped as 3-2-4` | Profile SSN is malformed | Use `123-45-6789` form |
 | `map is stuck in the 'deleting' state` | Host sweeper still draining | Wait, or use a different tail |
@@ -390,7 +390,7 @@ The maintenance surface is three pieces, and each is small on purpose:
 |---|---|
 | TEE contract | 1 370 lines of Rust (1 258 behaviour + 112 WIT boundary) plus a 94-line WIT world, 15 unit tests that run without a TEE, no network in tests. A new step is one `StepSpec` entry plus a `build_body` arm. |
 | Shared services + CLI | No build step, no bundler, one runtime dependency. |
-| Web console | No business logic of its own — panels call routes, routes call the same services the CLI calls. |
+| Web console | No business logic of its own. Panels call routes, and routes call the same services the CLI calls. |
 
 See [`docs/SUBMISSION.md`](docs/SUBMISSION.md) for the handover notes.
 

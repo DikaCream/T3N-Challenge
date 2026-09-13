@@ -17,7 +17,7 @@ import { invokeContract, registeredVersion } from "../t3n/tenant.ts";
  *
  * Dispatch targets the version **registered on-chain**, not the version in the
  * working copy's `Cargo.toml`. That is the difference between acting on what is
- * deployed and acting on what happens to be checked out — and on a deployed
+ * deployed and acting on what happens to be checked out, and on a deployed
  * server the `Cargo.toml` is not there at all. It also means the CLI stops being
  * a special case.
  */
@@ -72,7 +72,7 @@ export async function resolveContract(
 /**
  * Invoke one exported contract function and normalise the result.
  *
- * `unknown` in, JSON out — the SDK cannot know our schema, so narrowing happens
+ * `unknown` in, JSON out: the SDK cannot know our schema, so narrowing happens
  * once at this boundary via `decodeResult` and the caller asserts the shape it
  * needs.
  */

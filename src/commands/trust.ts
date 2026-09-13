@@ -32,9 +32,9 @@ const GRANT_USAGE =
  * Delegate scoped authority to an agent.
  *
  * Three separate limits, and all three matter:
- *  - `functions`   — which contract functions the agent may call
- *  - `contract_id` — which contract those functions live on
- *  - `allowed_hosts` — which hosts the contract may egress to *on the agent's
+ *  - `functions`: which contract functions the agent may call
+ *  - `contract_id`: which contract those functions live on
+ *  - `allowed_hosts`: which hosts the contract may egress to *on the agent's
  *    behalf*. An empty list is deny-all, which is why it defaults to the hosts
  *    this deployment actually uses rather than to `[]`.
  */
@@ -116,7 +116,7 @@ function splitList(raw: string | undefined): string[] | undefined {
 
 const GRANTS_USAGE = "hr-onboard grants [--json]";
 
-/** Read back this user's own delegation edges — the write in `grant`, verified. */
+/** Read back this user's own delegation edges, the write in `grant`, verified. */
 export async function cmdGrants(context: Context): Promise<number> {
   rejectUnknownFlags(context.args, ["json", "quiet", "help"], GRANTS_USAGE);
   rejectPositionals(context.args, GRANTS_USAGE);
@@ -190,7 +190,7 @@ export async function cmdAudit(context: Context): Promise<number> {
                 entry.outcome,
               ]),
             ),
-            report.next_seq === null ? "" : `\nmore available — resume from seq ${report.next_seq}`,
+            report.next_seq === null ? "" : `\nmore available: resume from seq ${report.next_seq}`,
           ]
             .filter((line) => line !== "")
             .join("\n"),

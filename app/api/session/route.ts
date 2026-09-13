@@ -43,7 +43,7 @@ export const GET = handler(async () => {
       version: deployed?.version ?? null,
       status: deployed?.status ?? null,
     },
-    // Hosts only — never credentials. The UI needs to show which endpoints the
+    // Hosts only, never credentials. The UI needs to show which endpoints the
     // tenant points at; it never needs the tokens themselves.
     targets: {
       identity: hostOnly(config.identity.endpoint),

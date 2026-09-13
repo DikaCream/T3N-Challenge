@@ -150,7 +150,7 @@ export async function registerContract(
  *
  * **Required for dispatchability, not optional metadata.** A registered contract
  * with no descriptor returns `status: "active"` from the inventory view yet
- * fails every `execute` with a bare `RPC Error: Internal error` — no field name,
+ * fails every `execute` with a bare `RPC Error: Internal error`, with no field name,
  * no hint that a descriptor is the missing piece. Publishing one is what makes
  * the contract callable, which is why `deploy` does it on every run.
  *
@@ -178,7 +178,7 @@ export interface InvokeInput {
 /**
  * Run one function of a registered tenant contract inside the enclave.
  *
- * Returns `unknown` deliberately — the SDK cannot know our schema, so the
+ * Returns `unknown` deliberately: the SDK cannot know our schema, so the
  * caller narrows it (`assertRecord`) at the boundary.
  */
 export async function invokeContract(
@@ -220,7 +220,7 @@ export function canonicalName(tenant: TenantClient, tail: string): string {
  *
  * Runtime code dispatches against *this*, not against the local `Cargo.toml`
  * version. A deployed server has no build tree, and even locally the two can
- * legitimately differ — the point of asking the chain is to act on what is
+ * legitimately differ; the point of asking the chain is to act on what is
  * actually deployed rather than on what happens to be in the working copy.
  */
 export async function registeredVersion(
@@ -248,7 +248,7 @@ export async function activityLog(
  * Delegate scoped authority to an agent DID.
  *
  * This is the whole trust model in one call: the agent gets named functions on
- * one contract, and an explicit egress allow-list. No grant, no access — the
+ * one contract, and an explicit egress allow-list. No grant, no access: the
  * contract still runs, the outbound call is simply denied.
  */
 export async function grantAgent(
@@ -263,6 +263,6 @@ export function describeGrant(grant: BoundGrant): string {
     `grantee   ${grant.grantee}`,
     `contract  ${grant.contract_id}`,
     `functions ${grant.functions.join(", ")}`,
-    `hosts     ${(grant.allowed_hosts ?? []).join(", ") || "(none — egress will be denied)"}`,
+    `hosts     ${(grant.allowed_hosts ?? []).join(", ") || "(none, egress will be denied)"}`,
   ].join("\n");
 }

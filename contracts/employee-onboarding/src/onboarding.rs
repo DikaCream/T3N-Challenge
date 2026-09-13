@@ -1,11 +1,11 @@
 //! Every behaviour of the hr-onboard contract.
 //!
 //! Shape of this file:
-//!   1. step definitions — the two outbound systems an onboarding touches
-//!   2. wire types — request inputs and response outputs
-//!   3. pure helpers — host-independent, covered by `cargo test` on the host
-//!   4. host calls — `#[cfg(target_arch = "wasm32")]` only
-//!   5. entry points — parse/validate, then dispatch to a wasm implementation
+//!   1. step definitions: the two outbound systems an onboarding touches
+//!   2. wire types: request inputs and response outputs
+//!   3. pure helpers: host-independent, covered by `cargo test` on the host
+//!   4. host calls: `#[cfg(target_arch = "wasm32")]` only
+//!   5. entry points: parse/validate, then dispatch to a wasm implementation
 
 // Only the wasm-only HTTP path builds header maps; gating the import keeps a
 // native `cargo test` warning-free.
@@ -34,7 +34,7 @@ pub const LOG_TAIL: &str = "onboarding-log";
 
 /// Log keys are `onboard:<employee_ref>`. `;` is the byte immediately above
 /// `:`, so `["onboard:", "onboard;")` is exactly the prefix range and the whole
-/// map is enumerable with one bounded range scan — no index map to keep in
+/// map is enumerable with one bounded range scan, with no index map to keep in
 /// sync.
 pub const LOG_KEY_PREFIX: &str = "onboard:";
 pub const LOG_SCAN_END: &str = "onboard;";
@@ -48,7 +48,7 @@ pub const LOG_SCAN_LIMIT: u32 = 100;
 
 /// A system an onboarding step talks to, and what it needs to do so.
 ///
-/// Adding a step is a data change here plus a `build_body` arm — not a change
+/// Adding a step is a data change here plus a `build_body` arm, not a change
 /// to the dispatch logic.
 #[derive(Debug)]
 pub struct StepSpec {
@@ -106,7 +106,7 @@ pub const FIELD_LAST_NAME: &str = "last_name";
 /// keeps it under the verified-contacts structure, so the resolvable marker is
 /// `{{profile.verified_contacts.email.value}}`. The flat `email_address` is a
 /// valid *input* field for `user-upsert` and is even listed in the documented
-/// Level-1 set — but it is not a resolvable path, and referencing it yields
+/// Level-1 set, but it is not a resolvable path, and referencing it yields
 /// `placeholder-unknown` ("the calling profile is missing field"), which reads
 /// like a data problem rather than a wrong field name.
 ///
@@ -173,7 +173,7 @@ pub struct StepResult {
     pub host: String,
     pub http_status: Option<u16>,
     /// The exact bytes sent, with `{{profile.*}}` markers intact. Present on a
-    /// dry run — that is the evidence no PII entered the contract.
+    /// dry run: that is the evidence no PII entered the contract.
     pub request_body: Option<String>,
     /// Operator-facing explanation. Never contains an upstream response body,
     /// which could echo PII back.
@@ -221,7 +221,7 @@ pub struct StepPreflight {
     /// dispatch" rather than "denied". The egress allow-list is enforced by the
     /// host at dispatch time and no import exposes it to a guest on demand.
     /// The obvious candidate, `authorisation.check-authorized`, is declared in
-    /// the WIT package but is not provided to a tenant contract at runtime —
+    /// the WIT package but is not provided to a tenant contract at runtime;
     /// importing it makes the component un-instantiable, so it cannot be used.
     pub egress_authorised: Option<bool>,
     /// Why egress authorisation is not reported here, or the denial reason
@@ -423,7 +423,7 @@ pub fn validate_employee_ref(value: &str) -> Result<(), String> {
         );
     }
     // `;` terminates the scan range, and `:` separates the key prefix from the
-    // id — neither may appear inside the id itself.
+    // id, and neither may appear inside the id itself.
     if value.contains(':') || value.contains(';') {
         return Err("employee_ref must not contain ':' or ';'".to_string());
     }
@@ -695,7 +695,7 @@ fn read_record(bytes: &[u8], employee_ref: &str) -> Result<OnboardingRecord, Str
 }
 
 // ===========================================================================
-// 6. Host calls — compiled only for the TEE target
+// 6. Host calls, compiled only for the TEE target
 // ===========================================================================
 
 #[cfg(target_arch = "wasm32")]
@@ -741,7 +741,7 @@ mod hostcalls {
 
     // There is deliberately no `authorise` helper here. The host is the only
     // authority on egress policy, and the only place it tells us is the dispatch
-    // error itself — see `describe_http_error`.
+    // error itself; see `describe_http_error`.
 
     /// POST JSON with host-side placeholder resolution.
     ///
@@ -768,7 +768,7 @@ mod hostcalls {
         Ok((response.code, response.payload))
     }
 
-    /// Never includes resolved PII — only field names and host-side reasons.
+    /// Never includes resolved PII, only field names and host-side reasons.
     ///
     /// `EgressDenied` becomes `StepError::Denied` so a refusal caused by policy
     /// reads differently from a refusal caused by a fault.
@@ -965,7 +965,7 @@ fn run_step(
     let host = host_of(&endpoint);
     let body = build_body(step.name, input)?;
     // Note: there is no placeholder list to pass. `http-with-placeholders` has
-    // no such field on its `request` record — the host scans the payload for
+    // no such field on its `request` record; the host scans the payload for
     // `{{profile.<field>}}` markers itself. `step.placeholders` is only used to
     // answer `contract-info` about what a caller must supply.
 
@@ -1156,7 +1156,7 @@ mod tests {
         let identity = String::from_utf8(build_body("provision-identity", &input).unwrap()).unwrap();
         assert!(identity.contains("{{profile.first_name}}"));
         assert!(identity.contains("{{profile.last_name}}"));
-        // Nested on purpose — see FIELD_EMAIL.
+        // Nested on purpose; see FIELD_EMAIL.
         assert!(identity.contains("{{profile.verified_contacts.email.value}}"));
         // The only caller-supplied values present are non-PII operational ones.
         assert!(identity.contains("emp-2041"));

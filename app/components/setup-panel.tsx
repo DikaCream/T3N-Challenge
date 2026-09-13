@@ -8,7 +8,7 @@ import { AsyncBody, Panel } from "./panel.tsx";
 /**
  * Tenant provisioning.
  *
- * Idempotent, and safe to press twice — it reconciles the maps to the declared
+ * Idempotent, and safe to press twice: it reconciles the maps to the declared
  * ACLs and rewrites the endpoint config.
  *
  * ## Why deploying is not a button here
@@ -50,20 +50,20 @@ export function SetupPanel({ onProvisioned }: { onProvisioned?: () => void }) {
     >
       <ul className="notes tight">
         <li>
-          <span className="mono">config</span> — endpoints and header names. Not secret.
+          <span className="mono">config</span>: endpoints and header names. Not secret.
         </li>
         <li>
-          <span className="mono">secrets</span> — readable <strong>only</strong> by the contract, so
+          <span className="mono">secrets</span>: readable <strong>only</strong> by the contract, so
           the process that writes a credential cannot read it back.
         </li>
         <li>
-          <span className="mono">onboarding-log</span> — writable <strong>only</strong> by the
+          <span className="mono">onboarding-log</span>: writable <strong>only</strong> by the
           contract, so a record cannot be back-dated by whoever holds the tenant key.
         </li>
       </ul>
 
       <p className="muted small">
-        Deploying the contract stays a CLI action (<span className="mono">hr-onboard deploy</span>) —
+        Deploying the contract stays a CLI action (<span className="mono">hr-onboard deploy</span>):
         it needs the compiled WASM artifact, which a deployed server does not have. Seeding
         credentials is CLI-only for the same reason: secrets come from the server environment, never
         from this page.

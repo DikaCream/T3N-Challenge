@@ -20,7 +20,7 @@ export interface OperatorContext {
  *
  * Every call authenticates afresh. That costs one handshake per request, and it
  * is the right trade for this deployment shape: a single-tenant console where
- * the alternative — a cached session in module scope — would have to reason
+ * the alternative, a cached session in module scope, would have to reason
  * about expiry, concurrent re-auth, and what happens to in-flight requests when
  * the cached session dies. The SDK's session lifetime is its own concern, and a
  * console is not a high-request-rate surface.

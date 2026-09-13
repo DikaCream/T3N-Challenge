@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  * Distinct from the `onboarding-log` map the contract writes, and deliberately
  * so: that map is what the *application* believes happened, this is what the
  * *network* recorded. `actor` and `on_behalf_of` here are host-stamped from the
- * verified dispatch context, so a contract cannot forge who acted — which is
+ * verified dispatch context, so a contract cannot forge who acted, which is
  * exactly the property a self-written log cannot provide.
  *
  * The read is scoped to the caller's own organisation; there is no scope
