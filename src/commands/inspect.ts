@@ -103,12 +103,16 @@ export async function cmdPreflight(context: Context): Promise<number> {
   emitResult({ ready: report.ready, enclave_report: report }, { json: context.config.json }, () =>
     [
       renderTable(
-        ["step", "egress host", "endpoint", "credential"],
+        ["step", "egress host", "endpoint", "credential", "egress auth"],
         report.steps.map((step) => [
           step.name,
           step.host === "" ? "(unset)" : step.host,
           step.endpoint_configured ? "yes" : "no",
           step.secret_present ? "yes" : "no",
+          // `null` means not knowable before dispatch, which is not the same as
+          // "denied". Printed rather than omitted so the column cannot be read as
+          // a green tick the host never gave.
+          step.egress_authorised === null ? "unknown" : step.egress_authorised ? "yes" : "no",
         ]),
       ),
       "",

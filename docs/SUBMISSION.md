@@ -28,7 +28,7 @@ Three components, all in the repo:
 | | |
 |---|---|
 | **TEE contract** | `contracts/employee-onboarding/`: Rust → `wasm32-wasip2`, five exported functions over WIT, 15 unit tests that run without a TEE |
-| **Agent + shared services** | `src/`: TypeScript, zero build step (Node 24 native type stripping), 12 CLI commands |
+| **Agent + shared services** | `src/`: TypeScript, zero build step (Node ≥ 22.18 native type stripping), 12 CLI commands |
 | **Web console** | `app/`: Next.js App Router. The SDK runs **only** in server route handlers; no client component ever holds `T3N_API_KEY` |
 
 The CLI and the console call the same `src/services/` functions, so the safety
@@ -294,7 +294,7 @@ Maintenance surface:
 
 | Component | Ongoing cost |
 |---|---|
-| TEE contract | Low. 1 370 lines of Rust plus a 94-line WIT world, 15 unit tests, no external network dependency in tests. Changes are additive: a new step is one `StepSpec` entry plus a `build_body` arm. |
+| TEE contract | Low. 1 389 lines of Rust plus a 94-line WIT world, 15 unit tests, no external network dependency in tests. Changes are additive: a new step is one `StepSpec` entry plus a `build_body` arm. |
 | Shared services + CLI | Low. Zero build step, no bundler, one runtime dependency (`@terminal3/t3n-sdk`). |
 | Web console | Low, because it holds no rules of its own: a panel calls a route, a route calls an existing service. A new operation is one route file plus one panel. |
 | Upstream integration | The real work, and it lives in configuration plus whichever HRIS/payroll schemas are targeted. `identity_endpoint` / `payroll_endpoint` and their header maps are the seams. |

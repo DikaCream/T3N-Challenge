@@ -55,7 +55,7 @@ Three components, all in the repo:
 | | |
 |---|---|
 | **TEE contract** | `contracts/employee-onboarding/`: Rust → `wasm32-wasip2`, five functions over WIT, 15 unit tests that run without a TEE |
-| **Agent + CLI** | `src/`: TypeScript, zero build step (Node 24 native type stripping), 12 commands |
+| **Agent + CLI** | `src/`: TypeScript, zero build step (Node ≥ 22.18 native type stripping), 12 commands |
 | **Web console** | `app/`: Next.js App Router. The SDK runs **only** in server route handlers |
 
 The CLI and the console call the same `src/services/` functions, so the safety
@@ -260,7 +260,7 @@ Neither carries its own copy of the logic.
 
 | Component | Ongoing cost |
 |---|---|
-| TEE contract | Low. 1 370 lines of Rust plus a 94-line WIT world, 15 unit tests with no network dependency. A new step is one `StepSpec` entry plus one `build_body` arm |
+| TEE contract | Low. 1 389 lines of Rust plus a 94-line WIT world, 15 unit tests with no network dependency. A new step is one `StepSpec` entry plus one `build_body` arm |
 | Shared services + CLI | Low. Zero build step, no bundler, one runtime dependency |
 | Web console | Low, because it holds no rules of its own: a panel calls a route, a route calls an existing service |
 | Upstream integration | The real work, and it lives in configuration plus whichever HRIS/payroll schemas are targeted |

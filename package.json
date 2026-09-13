@@ -6,7 +6,7 @@
   "description": "Privacy-preserving employee onboarding agent on Terminal 3 (T3N). The agent plans on non-sensitive data; a TEE contract acts; employee PII is resolved host-side inside the enclave and never enters application memory.",
   "license": "MIT",
   "engines": {
-    "node": ">=22.9.0"
+    "node": ">=22.18.0"
   },
   "scripts": {
     "dev": "next dev",
@@ -15,7 +15,7 @@
     "cli": "node --env-file-if-exists=.env src/cli.ts",
     "typecheck": "tsc --noEmit",
     "build:contract": "cargo build --manifest-path contracts/employee-onboarding/Cargo.toml --release --target wasm32-wasip2",
-    "test:contract": "cargo test --manifest-path contracts/employee-onboarding/Cargo.toml --target x86_64-unknown-linux-gnu --lib",
+    "test:contract": "cargo test --manifest-path contracts/employee-onboarding/Cargo.toml --lib",
     "test": "npm run typecheck && npm run test:contract"
   },
   "dependencies": {

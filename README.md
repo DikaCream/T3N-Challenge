@@ -84,7 +84,7 @@ number appeared there, the design would have failed visibly.
 
 ## Quickstart
 
-**Prerequisites:** Node ≥ 22.9 (for native TypeScript execution), Rust with the
+**Prerequisites:** Node ≥ 22.18 (for native TypeScript execution), Rust with the
 `wasm32-wasip2` target, and a T3N key.
 
 ```bash
@@ -388,7 +388,7 @@ The maintenance surface is three pieces, and each is small for a reason:
 
 | Piece | Why it stays maintainable |
 |---|---|
-| TEE contract | 1 370 lines of Rust (1 258 behaviour + 112 WIT boundary) plus a 94-line WIT world, 15 unit tests that run without a TEE, no network in tests. A new step is one `StepSpec` entry plus a `build_body` arm. |
+| TEE contract | 1 389 lines of Rust (1 277 behaviour + 112 WIT boundary) plus a 94-line WIT world, 15 unit tests that run without a TEE, no network in tests. A new step is one `StepSpec` entry plus a `build_body` arm. |
 | Shared services + CLI | No build step, no bundler, one runtime dependency. |
 | Web console | No business logic of its own. Panels call routes, and routes call the same services the CLI calls. |
 
