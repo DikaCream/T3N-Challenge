@@ -1,0 +1,150 @@
+Operator session
+----------------
+Operator session
+Refresh
+DID
+did:t3n:50a04efc91641528919da135e31d8995fcd642b3
+Environment
+testnet
+Node
+https://cn-api.sg.testnet.t3n.terminal3.io
+Credits
+1393.351556
+Contract registered — z:50a04efc91641528919da135e31d8995fcd642b3:employee-onboarding v0.1.2 (active)
+ONBOARDING TARGETS
+HRIS
+httpbin.org
+Payroll
+httpbin.org
+Upstream tokens
+HRIS none · payroll none — held in the enclave-only secrets map
+
+Tenant setup
+------------
+Tenant setup
+Create the three maps and write the step endpoints into the config map.
+Provision
+config — endpoints and header names. Not secret.
+secrets — readable only by the contract, so the process that writes a credential cannot read it back.
+onboarding-log — writable only by the contract, so a record cannot be back-dated by whoever holds the tenant key.
+Deploying the contract stays a CLI action (hr-onboard deploy) — it needs the compiled WASM artifact, which a deployed server does not have. Seeding credentials is CLI-only for the same reason: secrets come from the server environment, never from this page.
+Not run yet.
+
+Preflight
+---------
+Preflight
+What is configured, and what is still missing? No side effects.
+Check
+Deployed
+z:50a04efc91641528919da135e31d8995fcd642b3:employee-onboarding v0.1.2
+CONFIGURED — every step has an endpoint
+STEP	EGRESS HOST	ENDPOINT	CREDENTIAL
+provision-identity	httpbin.org	yes	none
+enroll-payroll	httpbin.org	yes	none
+EGRESS
+host-side per-contract allow-list, evaluated at dispatch; a refused host is reported as status `denied` with an `egress denied for host ...` reason
+MISSING
+config keys
+none
+secret keys
+hris_api_key, payroll_api_key — only a problem if the upstream requires auth
+RESOLVED INSIDE THE ENCLAVE, NEVER BY THE AGENT
+{{profile.first_name}}
+{{profile.last_name}}
+{{profile.verified_contacts.email.value}}
+{{profile.ssn}}
+{{profile.address}}
+{{profile.country_of_residence}}
+
+Onboard an employee
+-------------------
+Onboard an employee
+Plan → preflight → run. Dry unless you tick Live.
+EMPLOYEE REF
+ROLE
+DEPARTMENT
+START DATE
+CURRENCY
+LIVE — ACTUALLY SEND. WITHOUT THIS NOTHING LEAVES THE ENCLAVE AND NO RECORD IS WRITTEN.
+Run dry onboarding
+No name, national id, address or email is sent from here — there is no field for one.
+PLAN
+planner
+deterministic · risk low
+steps
+provision-identity → enroll-payroll
+rationale
+Standard hire: provisioning a seat, then enrolling with payroll for the first pay run starting 2026-09-27.
+No LLM_API_KEY set, so the deterministic planner was used.
+RESULT
+planned (dry run — nothing sent, nothing written)
+STEP	STATUS	HOST	HTTP
+provision-identity	planned	httpbin.org	-
+enroll-payroll	planned	httpbin.org	-
+provision-identity: dry run: request not sent
+enroll-payroll: dry run: request not sent
+THE EVIDENCE
+The exact bytes the enclave would send. Every {{profile.*}} marker is substituted by the host inside the enclave, after this output was produced — if a real name or account number appeared here, the design would have failed visibly.
+provision-identity
+{"external_ref":"emp-2041","given_name":"{{profile.first_name}}","family_name":"{{profile.last_name}}","personal_email":"{{profile.verified_contacts.email.value}}","role":"Backend Engineer","department":"Platform","start_date":"2026-09-27"}
+enroll-payroll
+{"external_ref":"emp-2041","given_name":"{{profile.first_name}}","family_name":"{{profile.last_name}}","tax_id":"{{profile.ssn}}","address":"{{profile.address}}","country":"{{profile.country_of_residence}}","currency":"USD"}
+RECORD
+contract
+v0.1.2
+contains_pii
+false
+recorded_at
+2026-09-13T10:48:44.000Z
+
+Onboarding records
+------------------
+Onboarding records
+What the contract wrote into the onboarding-log map. No PII by construction.
+EMPLOYEE REF
+Look up
+List recent
+EMPLOYEE_REF	STATUS	STEPS	DRY_RUN	RECORDED_AT
+emp-2041	completed	provision-identity:ok enroll-payroll:ok	false	2026-09-13T10:39:50.000Z
+
+Audit trail
+-----------
+Audit trail
+Host-stamped dispatches from the ledger. A contract cannot forge who acted.
+Load
+SEQ	WHEN	CALLER	ON BEHALF OF	FUNCTION	OUTCOME
+222250	2026-09-13T10:48:03.321Z	human:did:t3…d642b3	did:t3…d642b3	get-onboarding-status	success
+222242	2026-09-13T10:47:58.103Z	human:did:t3…d642b3	did:t3…d642b3	start-onboarding	success
+222239	2026-09-13T10:47:57.770Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+222231	2026-09-13T10:47:53.020Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+222208	2026-09-13T10:46:42.982Z	human:did:t3…d642b3	did:t3…d642b3	get-onboarding-status	success
+222200	2026-09-13T10:46:01.120Z	human:did:t3…d642b3	did:t3…d642b3	get-onboarding-status	success
+222192	2026-09-13T10:44:59.020Z	human:did:t3…d642b3	did:t3…d642b3	contract-info	success
+222183	2026-09-13T10:43:49.021Z	human:did:t3…d642b3	did:t3…d642b3	get-onboarding-status	success
+222171	2026-09-13T10:42:53.220Z	human:did:t3…d642b3	did:t3…d642b3	contract-info	success
+222157	2026-09-13T10:42:37.120Z	human:did:t3…d642b3	did:t3…d642b3	contract-info	success
+222149	2026-09-13T10:42:12.920Z	human:did:t3…d642b3	did:t3…d642b3	list-onboardings	success
+222144	2026-09-13T10:42:11.921Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+222122	2026-09-13T10:40:05.921Z	human:did:t3…d642b3	did:t3…d642b3	get-onboarding-status	success
+222114	2026-09-13T10:39:51.712Z	human:did:t3…d642b3	did:t3…d642b3	start-onboarding	success
+222108	2026-09-13T10:39:50.229Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+222044	2026-09-13T10:31:36.533Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+222036	2026-09-13T10:31:27.921Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+222021	2026-09-13T10:31:07.220Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+221994	2026-09-13T10:30:03.571Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+221986	2026-09-13T10:29:29.020Z	human:did:t3…d642b3	did:t3…d642b3	contract-info	success
+221865	2026-09-13T10:16:19.421Z	human:did:t3…d642b3	did:t3…d642b3	start-onboarding	success
+221861	2026-09-13T10:16:18.821Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+221852	2026-09-13T10:16:10.863Z	human:did:t3…d642b3	did:t3…d642b3	list-onboardings	success
+221844	2026-09-13T10:16:06.020Z	human:did:t3…d642b3	did:t3…d642b3	preflight	success
+221829	2026-09-13T10:15:11.214Z	human:did:t3…d642b3	did:t3…d642b3	get-onboarding-status	success
+More available — resume from seq 221828.
+
+Why the privacy claim holds
+---------------------------
+Why the privacy claim holds
+The contract has nowhere to put PII. Its input type is employee_ref, role, department and start date. A caller wanting to send a name has no field to send it in.
+The markers are the payload. Request bodies contain literal {{profile.first_name}}. That is not a redaction applied for display — it is genuinely all the contract ever holds.
+The host substitutes, not the app. Resolution happens after the bytes leave WASM, inside the enclave, immediately before egress.
+Responses are never forwarded. Only the status code is read, because an upstream can echo the PII straight back.
+Secrets are enclave-only. The secrets map is readable only by the contract, so the process that writes a credential cannot read it back.

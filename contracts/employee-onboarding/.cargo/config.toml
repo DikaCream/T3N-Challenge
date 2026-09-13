@@ -1,0 +1,16 @@
+# No `[build] target` default on purpose.
+#
+# Setting `target = "wasm32-wasip2"` here makes `cargo build` convenient but
+# breaks `cargo test`: the test harness links a .wasm binary and then tries to
+# execute it as a host process, which fails with
+#
+#     could not execute process .../hr_onboard-*.wasm (never executed)
+#     Caused by: Permission denied (os error 13)
+#
+# That error names neither cargo's target default nor the missing runner, so it
+# reads like a broken toolchain. The unit tests are the reason this contract is
+# maintainable without a TEE, so they must be the obvious thing to run.
+#
+# The wasm target is passed explicitly instead, where it is visible:
+#   npm run build:contract   -> cargo build --target wasm32-wasip2
+#   npm run test:contract    -> cargo test  --target x86_64-unknown-linux-gnu

@@ -1,0 +1,444 @@
+/*
+ * Hand-written CSS rather than a framework.
+ *
+ * The whole app is a handful of panels; a utility framework plus its build
+ * integration would be more to maintain than the ~200 lines below, and
+ * "ease to maintain post challenge" is the criterion that matters most here.
+ */
+
+:root {
+  --bg: #0b0d10;
+  --panel: #14181d;
+  --panel-2: #1a1f26;
+  --line: #262d36;
+  --text: #e6e9ee;
+  --muted: #8b96a5;
+  --accent: #6ee7b7;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.shell {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  margin-bottom: 32px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font: 600 12px/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0 0 16px;
+  font-size: 30px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  max-width: 30ch;
+}
+
+.lede {
+  margin: 0;
+  max-width: 74ch;
+  color: var(--muted);
+}
+
+.lede strong {
+  color: var(--text);
+}
+
+/* ---------- layout ---------- */
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  align-items: start;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+}
+
+.card h3 {
+  margin: 20px 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- key/value ---------- */
+
+.pairs {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 6px 12px;
+  margin: 0;
+}
+
+.pairs dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.pairs dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- text helpers ---------- */
+
+.mono {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.wrap {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.good {
+  color: var(--accent);
+}
+
+.bad {
+  color: var(--bad);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+/* ---------- banner ---------- */
+
+.banner {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid currentColor;
+  border-radius: 6px;
+  background: var(--panel-2);
+  font-size: 13px;
+}
+
+/* ---------- controls ---------- */
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.ghost {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.ghost:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- claims list ---------- */
+
+.claims {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.claims li {
+  margin-bottom: 12px;
+}
+
+.claims strong {
+  color: var(--text);
+}
+
+/* ---------- panel subtitle ---------- */
+
+.sub {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  max-width: 60ch;
+}
+
+/* ---------- data tables ---------- */
+
+.data {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 0;
+  font-size: 13px;
+}
+
+.data th {
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.data td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.data tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---------- boxed output ---------- */
+
+.boxed {
+  margin: 8px 0 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #0d1116;
+  font-size: 12px;
+  max-height: 340px;
+  overflow: auto;
+}
+
+/* ---------- forms ---------- */
+
+.form {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.inline-form {
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  align-items: end;
+}
+
+.form label {
+  display: grid;
+  gap: 4px;
+}
+
+.form label > span {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.form input[type="text"],
+.form input[type="date"],
+.form input:not([type]) {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #0d1116;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inline {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  color: var(--text) !important;
+  font-size: 13px !important;
+}
+
+.inline input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+}
+
+.primary {
+  padding: 8px 14px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- chips ---------- */
+
+.chips {
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #0d1116;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* ---------- notes ---------- */
+
+.notes {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.notes.tight li {
+  margin-bottom: 6px;
+}
+
+.notes li + li {
+  margin-top: 6px;
+}
+
+.notes .mono,
+.notes strong {
+  color: var(--text);
+}
+
+/* ---------- risk ---------- */
+
+.risk-low {
+  color: var(--accent);
+}
+
+.risk-medium {
+  color: var(--warn);
+}
+
+.risk-high {
+  color: var(--bad);
+}
+
+/* ---------- details ---------- */
+
+details {
+  margin-top: 10px;
+}
+
+details > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+details > summary:hover {
+  color: var(--accent);
+}
+
+/* ---------- wide card ---------- */
+
+.why {
+  margin-top: 16px;
+}
+
+/* ---------- footer ---------- */
+
+.foot {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+}

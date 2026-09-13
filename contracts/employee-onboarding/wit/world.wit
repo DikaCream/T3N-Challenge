@@ -1,0 +1,94 @@
+/// hr-onboard WIT world — privacy-preserving employee onboarding.
+///
+/// Imports required host capabilities:
+/// - tenant-context: the tenant DID, so the contract can name its own
+///   `z:<tid>:*` maps without being told which tenant it is running as.
+/// - logging: debug / info / error lines.
+/// - kv-store: reads operator config (`config` map), reads API credentials
+///   (`secrets` map), and persists one non-PII record per onboarding
+///   (`onboarding-log` map). The contract never writes `secrets`.
+/// - http-with-placeholders: the only outbound call surface used. Every
+///   request body carries `{{profile.<field>}}` markers that the host
+///   resolves inside the enclave at dispatch time, so employee PII
+///   (name, personal email, national id, address) never enters WASM memory.
+///
+/// Deliberately NOT imported: `host:interfaces/authorisation@2.1.0`. It is
+/// declared in the WIT package's `world interfaces` and implemented by the
+/// host, but it is not provided to a tenant contract at runtime: importing it
+/// makes the component un-instantiable, and every dispatch then fails with a
+/// bare `RPC Error: Internal error`. Egress policy is enforced by the host at
+/// dispatch instead, and a refusal is reported through
+/// `http-with-placeholders`'s typed `egress-denied` variant. See docs/BUGS.md.
+///
+/// Capabilities are derived from these imports; there is no separate
+/// manifest to keep in sync.
+package z:hr-onboard@0.1.0;
+
+world hr-onboard {
+    import host:tenant/tenant-context@1.0.0;
+    import host:interfaces/logging@2.1.0;
+    import host:interfaces/kv-store@2.1.0;
+    import host:interfaces/http-with-placeholders@2.1.0;
+
+    export contracts;
+}
+
+interface contracts {
+    /// Standard 3-field envelope used by every contract callable from the node.
+    /// `input` — JSON-serialised request payload specific to the function.
+    /// `user-profile` — always None for tenant contracts (hardcoded at dispatch).
+    /// `context` — JSON-serialised DynamicContext (node-minted, trusted).
+    record generic-input {
+        input: option<list<u8>>,
+        user-profile: option<list<u8>>,
+        context: option<list<u8>>,
+    }
+
+    /// Describe this contract without touching any state or network: version,
+    /// exported functions, the config/secret keys an operator must provide, the
+    /// profile fields each step needs, and the hosts it will egress to.
+    ///
+    /// Input: `{}`
+    contract-info: func(req: generic-input) -> result<list<u8>, string>;
+
+    /// Answer "what is missing?" — reports, per step, whether an endpoint is
+    /// configured, whether a credential is present, and the host it will egress
+    /// to, plus which config keys, secret keys and profile fields are absent.
+    ///
+    /// Egress *authorisation* is NOT reported, because it cannot be known here:
+    /// the allow-list is evaluated by the host at dispatch, and no import
+    /// exposes it to the guest. `egress_authorised` is therefore always null and
+    /// the report says so explicitly.
+    ///
+    /// Never performs an outbound call and never writes a record.
+    ///
+    /// Input: `{ "steps"?: string[] }`
+    preflight: func(req: generic-input) -> result<list<u8>, string>;
+
+    /// Run (or simulate) the onboarding for one employee.
+    ///
+    /// Input:
+    /// `{ employee_ref, role, department, start_date, dry_run?, steps? }`
+    ///
+    /// `dry_run` defaults to **true**: nothing is sent and no record is written
+    /// until the caller explicitly passes `false`. A dry run returns the exact
+    /// request bodies with the `{{profile.*}}` markers still unresolved, which
+    /// is the evidence that no PII reaches the contract.
+    ///
+    /// Carries NO employee PII: `employee_ref` is an HR-internal identifier.
+    ///
+    /// Output: an onboarding record (see `docs/ARCHITECTURE.md`).
+    start-onboarding: func(req: generic-input) -> result<list<u8>, string>;
+
+    /// Read the stored onboarding record for one employee.
+    ///
+    /// Input: `{ "employee_ref": string }`
+    /// Output: `{ "found": false }` or `{ "found": true, "record": {...} }`
+    get-onboarding-status: func(req: generic-input) -> result<list<u8>, string>;
+
+    /// Enumerate stored onboarding records, newest-state first.
+    ///
+    /// Input: `{ "status"?: string, "limit"?: u32 }`
+    /// Output: `{ "count": u32, "records": [...] }`
+    list-onboardings: func(req: generic-input) -> result<list<u8>, string>;
+}
