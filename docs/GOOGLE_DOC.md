@@ -24,8 +24,8 @@ refresh it after editing this file, run `npm run build:docx`.
 Either route ends the same way: set the Doc's sharing to
 **Anyone with the link → Viewer** and paste that link into the submission form.
 
-One value is still blank, marked `TODO`: the email address. Everything else is filled
-in.
+Section 8 gives the three form answers. The email address is the one answer supplied
+directly in the form rather than printed here, because this Doc is public.
 
 ---
 
@@ -311,7 +311,11 @@ supports that mode today.
 
 ## 8. Submission form answers
 
-- **Email address:** `TODO`
+The submission form asks three required questions. Two answers are recorded here; the
+third is entered directly in the form.
+
+- **Email address:** entered directly in the submission form rather than printed in
+  this public Doc. It is used only for contact and the prize payout.
 - **DID generated from the page:** `did:t3n:50a04efc91641528919da135e31d8995fcd642b3`
 - **Continue running this, or pass it to us to run it:** **Continue running it**, and
   equally happy to hand it over. It is a standalone testnet integration with no

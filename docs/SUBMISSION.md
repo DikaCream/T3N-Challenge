@@ -345,7 +345,12 @@ decision does not change the design.
 
 ## 8. Submission form answers
 
-- **Email address:** `<TODO>`
+The listing's submission form asks three required questions. Two answers are recorded
+here; the third is entered directly in the form.
+
+- **Email address:** entered directly in the submission form rather than printed
+  here. This file is public, and the address is used only for contact and the prize
+  payout, so it is kept out of the public artefacts on purpose.
 - **DID generated from the page:** `did:t3n:50a04efc91641528919da135e31d8995fcd642b3`
 - **Continue running this / pass it to us to run it:** continue running it; happy
   to hand over. Handover process is Section 7.
