@@ -204,7 +204,7 @@ descriptor  published
 info        full self-description returned from inside the enclave
 preflight   provision-identity httpbin.org endpoint=yes credential=no
             enroll-payroll     httpbin.org endpoint=yes credential=no
-            ready (configured)
+            READY (configured)
 ```
 
 The dry run returns the exact bodies the host would send, markers unresolved:
